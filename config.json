@@ -1,3 +1,25 @@
 {
-  "shop": "CITTAFIERA"
+  "shop": "CITTAFIERA",
+  "regioni": [
+    "PUGLIA",
+    "BASILICATA",
+    "ABRUZZO",
+    "CALABRIA",   
+    "CAMPANIA",   
+    "EMILIA",
+    "FRIULI",
+    "LAZIO",
+    "LIGURIA",
+    "LOMBARDIA",
+    "MARCHE",
+    "MOLISE",
+    "PIEMONTE",
+    "SARDEGNA",
+    "SICILIA",
+    "TOSCANA",
+    "TRENTINO",
+    "UMBRIA",
+    "VAL_D'AOSTA",
+    "VENETO"
+  ]
 }
