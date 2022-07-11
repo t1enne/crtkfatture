@@ -88,6 +88,10 @@ export const App = (v: Vnode<{}, { active: number }>) => {
     },
   ];
   return {
+    onload() {
+      const configFileContent = printConfig()
+      console.log(configFileContent)
+    },
     view() {
       return m(
         ".app_root",

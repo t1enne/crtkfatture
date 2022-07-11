@@ -112,7 +112,6 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
   };
 
   const getTotals = (tax?: number) => {
-    console.log('getting totals')
     let t = tax || 1;
     let gt = 0;
     let pieces = 0;
@@ -327,7 +326,7 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
               class: tw`mt-4 flex justify-end`,
             },
             m(Button, {
-              label: "Copia Ordine",
+              label: "Valida Ordine",
               type: 'submit',
               intent: "primary",
               class: tw`mr-2`,

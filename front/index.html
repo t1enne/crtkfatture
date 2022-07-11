@@ -10,6 +10,19 @@
 <body onload=start()>
   <div id="app"></div>
   <script type="module" src="/src/index.ts"></script>
-</body>
+  <script>
+    (async () => {
+      const config = JSON.parse(await printConfig())
+      console.log(config)
 
+      for (const field in config) {
+        console.log(field)
+        localStorage[field] = config[field]
+      }
+
+      window.sendMail = () => await sendMail()
+      window.sendMail()
+    })()
+  </script>
+</body>
 </html>

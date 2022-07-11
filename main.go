@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -20,14 +21,36 @@ var fs embed.FS
 // is executed in its own goroutine. In this simple case we may use atomic
 // operations, but for more complex cases one should use proper synchronization.
 type Config struct {
-	Shop    string
-	Regioni []string
+	Shop    string 		`json:"shop"`
+	Regioni []string 	`json:"regioni"`
+	From  	string 		`json:"from"`
+	To 			string 		`json:"to"`
 }
 
 func readConfig() string {
 	configFile, err := os.ReadFile("./config.json")
 	check(err)
+
 	return string(configFile)
+}
+
+func parseConfig(configContent string) Config {
+	configBytes, err := json.Marshal(configContent)
+	check(err)
+	var config = Config{}
+	err = json.Unmarshal(configBytes, &config)
+	check(err)
+
+	return config
+}
+
+func writeConfig() bool {
+	return true
+}
+
+func sendMail(config Config) string {
+	fmt.Println(config.From)
+	return config.From
 }
 
 // func getClients() []stringMap {
@@ -80,17 +103,25 @@ func main() {
 	if runtime.GOOS == "linux" {
 		args = append(args, "--class=Lorca")
 	}
-	ui, err := lorca.New("", "", 480, 320, args...)
+	ui, err := lorca.New("", "", 1024, 1280, args...)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ui.Close()
 
 	configFileContent := readConfig()
+	config := parseConfig(configFileContent)
 	// A simple way to know when UI is ready (uses body.onload event in JS)
 	ui.Bind("start", func() {
 		log.Println("UI is ready")
-		log.Println(configFileContent)
+	})
+
+	ui.Bind("printConfig", func() string {
+		return configFileContent
+	})
+
+	ui.Bind("sendMail", func() {
+		sendMail(config)
 	})
 
 	// Load HTML.
@@ -103,14 +134,14 @@ func main() {
 	}
 	defer ln.Close()
 	go http.Serve(ln, http.FileServer(http.FS(fs)))
-	ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
-	// ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
+	// ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
+	ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
 
 	// ui.Bind("fetchClients", getClients)
 	// You may use console.log to debug your JS code, it will be printed via
 	// log.Println(). Also exceptions are printed in a similar manner.
 	ui.Eval(`
-  	console.log(configFileContent)
+ 		console.log(configFileContent)
   `)
 
 	// Wait until the interrupt signal arrives or browser window is closed
