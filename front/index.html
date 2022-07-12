@@ -1,28 +1,26 @@
 <!DOCTYPE html>
 <html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CortekStore Fatture</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CortekStore Fatture</title>
-</head>
+  <body onload="start()">
+    <div id="app"></div>
+    <script>
+      // window.updateConfigFile = async (settings) => {
+      //   const updated = await updateConfigFile(JSON.parse(settings));
+      //   if (updated) return true;
+      // };
+      let settings;
+      window.getConfig = () => settings;
 
-<body onload=start()>
-  <div id="app"></div>
-  <script type="module" src="/src/index.ts"></script>
-  <script>
-    (async () => {
-      const config = JSON.parse(await printConfig())
-      console.log(config)
-
-      for (const field in config) {
-        console.log(field)
-        localStorage[field] = config[field]
-      }
-
-      window.sendMail = () => await sendMail()
-      window.sendMail()
-    })()
-  </script>
-</body>
+      (async () => {
+        settings = JSON.parse(await fetchConfigFileContent());
+        window.localSettings = settings;
+      })();
+    </script>
+    <script type="module" src="/src/index.ts" defer></script>
+  </body>
 </html>

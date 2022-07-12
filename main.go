@@ -21,10 +21,10 @@ var fs embed.FS
 // is executed in its own goroutine. In this simple case we may use atomic
 // operations, but for more complex cases one should use proper synchronization.
 type Config struct {
-	Shop    string 		`json:"shop"`
-	Regioni []string 	`json:"regioni"`
-	From  	string 		`json:"from"`
-	To 			string 		`json:"to"`
+	Shop    string   `json:"shop"`
+	Regioni []string `json:"regioni"`
+	From    string   `json:"from"`
+	To      string   `json:"to"`
 }
 
 func readConfig() string {
@@ -35,18 +35,19 @@ func readConfig() string {
 }
 
 func parseConfig(configContent string) Config {
-	configBytes, err := json.Marshal(configContent)
+	configFile, err := os.ReadFile("./config.json")
 	check(err)
 	var config = Config{}
-	err = json.Unmarshal(configBytes, &config)
+	err = json.Unmarshal(configFile, &config)
 	check(err)
 
 	return config
 }
 
-func writeConfig() bool {
-	return true
-}
+// func writeConfig(configString string) err error {
+
+// 	return true
+// }
 
 func sendMail(config Config) string {
 	fmt.Println(config.From)
@@ -103,7 +104,7 @@ func main() {
 	if runtime.GOOS == "linux" {
 		args = append(args, "--class=Lorca")
 	}
-	ui, err := lorca.New("", "", 1024, 1280, args...)
+	ui, err := lorca.New("", "", 1024, 980, args...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -116,12 +117,17 @@ func main() {
 		log.Println("UI is ready")
 	})
 
-	ui.Bind("printConfig", func() string {
+	ui.Bind("fetchConfigFileContent", func() string {
 		return configFileContent
 	})
 
 	ui.Bind("sendMail", func() {
 		sendMail(config)
+	})
+
+	ui.Bind("updateConfigFile", func() bool {
+
+		return true
 	})
 
 	// Load HTML.
@@ -136,13 +142,6 @@ func main() {
 	go http.Serve(ln, http.FileServer(http.FS(fs)))
 	// ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
 	ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
-
-	// ui.Bind("fetchClients", getClients)
-	// You may use console.log to debug your JS code, it will be printed via
-	// log.Println(). Also exceptions are printed in a similar manner.
-	ui.Eval(`
- 		console.log(configFileContent)
-  `)
 
 	// Wait until the interrupt signal arrives or browser window is closed
 	sigc := make(chan os.Signal)
@@ -160,5 +159,3 @@ func check(e error) {
 		panic(e)
 	}
 }
-
-type stringMap map[string]string

@@ -1,11 +1,24 @@
 {
-  "shop": "CITTAFIERA",
+  "shop": "GHERLINDA",
+  "shops": [
+    "ROMAEST",
+    "FIUMARA",
+    "GLOBO",
+    "ORIO AL SERIO",
+    "CASAMASSIMA",
+    "PORTE DI CATANIA",
+    "GHERLINDA"
+  ],
+  "venditori": [
+    "Nazir",
+    "Iman"
+  ],
   "regioni": [
     "PUGLIA",
     "BASILICATA",
     "ABRUZZO",
-    "CALABRIA",   
-    "CAMPANIA",   
+    "CALABRIA",
+    "CAMPANIA",
     "EMILIA",
     "FRIULI",
     "LAZIO",

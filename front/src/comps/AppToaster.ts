@@ -7,12 +7,13 @@ export interface ToastInterface {
 }
 
 export const Toasts = new Toaster();
+
 export const AppToaster = {
   notify({ msg, intent }) {
     Toasts.show({
       message: msg,
       intent,
-      timeout: 5000,
+      timeout: 4500,
       icon: intent == "negative"
         ? Icons.ALERT_CIRCLE
         : intent == "warning"

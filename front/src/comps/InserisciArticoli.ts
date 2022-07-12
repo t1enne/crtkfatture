@@ -5,9 +5,10 @@ import {
   Button,
   Card,
   ControlGroup,
+  Form,
+  FormLabel,
   Icon,
   Icons,
-  Form,
   Input,
   Overlay,
   Select,
@@ -62,17 +63,16 @@ const euroTag = m("tag", {
 }, "€");
 
 const parseNewClient = (client: ClientInterface) => {
-
-  if (!client) return []
+  if (!client) return [];
   const arr = [];
-  const newHeader = `*${client.header}`
+  const newHeader = `*${client.header}`;
 
-  arr.push('\n', newHeader)
+  arr.push("\n", newHeader);
 
   for (const key in client) {
-    const value = client[key]
+    const value = client[key];
 
-    if (value != "") arr.push(`${key}${addSpaces(key)}${value}`)
+    if (value != "") arr.push(`${key}${addSpaces(key)}${value}`);
   }
 
   return arr.join("\n");
@@ -123,6 +123,7 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
   };
 
   const writeOrderText = (store: StoreInterface, items: LineItem[]) => {
+    const { localSettings } = window;
     const lineItemsTexts = items.map((l) => {
       let { qty, art, price } = l;
       if (qty() < 10 && qty().toString().length < 2) {
@@ -144,9 +145,11 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
         .map((l) => l.join("\t"))
         .join("\n"),
       `STATUS   PRONTO ${getTotals(1).pieces} COLLI`,
-      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${localStorage.shop} € ${(parseFloat(getTotals(1.22).price) *
-        v.attrs.store.iva).toFixed(2)} ${note()}`,
-      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${localStorage.shop}\n\n`,
+      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings.shop} € ${
+        (parseFloat(getTotals(1.22).price) *
+          v.attrs.store.iva).toFixed(2)
+      } ${note()}`,
+      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings.shop}`,
     ].join("\n");
 
     return text;
@@ -189,33 +192,36 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
             ]),
           ]),
         }),
-        m(Form, {
-          onsubmit: (e: SubmitEvent) => {
-            e.preventDefault()
-            console.log(e)
-          }
-        },
+        m(
+          Form,
+          {
+            onsubmit: (e: SubmitEvent) => {
+              e.preventDefault();
+              console.log(e);
+            },
+          },
           m(
             ControlGroup,
             {
               class: tw`grid w-full`,
               style: {
-                // @ts-ignore
-                "grid-template-columns": "70px 1fr 120px 120px",
+                gridTemplateColumns: "70px 1fr 120px 120px",
               },
             },
-            m("h1", { class: tw`font-bold text-md ml-2` }, "Qtà"),
-            m("h1", { class: tw`font-bold text-md ml-2` }, "Articolo"),
-            m("h1", { class: tw`font-bold text-md ml-2` }, "Prezzo"),
-            m("h1", { class: tw`font-bold text-md ml-2` }, "Totale"),
+            [
+              m("h1", { class: tw`font-bold text-md ml-2` }, "Qtà"),
+              m("h1", { class: tw`font-bold text-md ml-2` }, "Articolo"),
+              m("h1", { class: tw`font-bold text-md ml-2` }, "Prezzo"),
+              m("h1", { class: tw`font-bold text-md ml-2` }, "Totale"),
+            ],
           ),
           lineItems.map(({ qty, art, price, total }) => {
             return m(LineItem, { qty, art, price, total });
           }),
-
-          m(ControlGroup,
+          m(
+            ControlGroup,
             {
-              class: tw`w-full flex justify-end py-4`
+              class: tw`w-full flex justify-end py-4`,
             },
             m(
               ".buttons",
@@ -273,17 +279,29 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
               },
             }),
           ),
+          m("h1", { class: tw`font-bold text-sm ml-2 mt-6` }, "Venditori"),
+          m(
+            ControlGroup,
+            { class: tw`w-full ` },
+            m(Select, {
+              options: window.localSettings.venditori,
+              defaultValue: "",
+              required: true,
+              value: "",
+              onchange: (e: InputEvent) => {
+              },
+            }),
+          ),
           m(
             ControlGroup,
             {
-              class: tw`grid grid-cols-4 mt-8`,
+              class: tw`w-full grid grid-cols-4 mt-8`,
             },
             m("h1", "# Scontrino"),
             m("h1", "Imponibile"),
             m("h1", "IVA"),
             m("h1", "Totale Lordo"),
           ),
-
           m(
             ControlGroup,
             {
@@ -319,7 +337,6 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
                 v.attrs.store.iva).toFixed(2),
             }),
           ),
-
           m(
             ".buttons",
             {
@@ -327,7 +344,7 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
             },
             m(Button, {
               label: "Valida Ordine",
-              type: 'submit',
+              type: "submit",
               intent: "primary",
               class: tw`mr-2`,
               onclick() {
@@ -351,12 +368,12 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
         m(
           ControlGroup,
           {
-            class: tw`w-full h-full`,
+            class: tw`w-full h-full mt-4`,
           },
           m(TextArea, {
             class: tw`w-full h-96`,
             style: {
-              fontFamily: 'monospace'
+              fontFamily: "monospace",
             },
             placeholder: "Recap ordine",
             fluid: true,

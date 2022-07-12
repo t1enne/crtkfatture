@@ -15,7 +15,7 @@ import { Impostazioni } from "./comps/Impostazioni";
 // import { Storico } from "./comps/Storico";
 
 export interface ClientInterface {
-  header?: string,
+  header?: string;
   INDIRIZZO: string;
   PIVA: string;
   CF: string;
@@ -38,6 +38,7 @@ export interface StoreInterface {
   newClient: ClientInterface;
   activeTab: number;
   iva: 1.22 | 1.04;
+  localSettings: Window["localSettings"];
 }
 
 export interface TabsProps {
@@ -46,7 +47,6 @@ export interface TabsProps {
 }
 
 export const App = (v: Vnode<{}, { active: number }>) => {
-
   const inputFields: ClientInterface = {
     header: "",
     INDIRIZZO: "",
@@ -63,13 +63,14 @@ export const App = (v: Vnode<{}, { active: number }>) => {
     START: "",
   };
 
-  let Store: StoreInterface = {
+  const Store: StoreInterface = {
     clients: [],
     inputs: inputFields,
     selectedClient: undefined,
     newClient: undefined,
     activeTab: 0,
     iva: 1.22,
+    localSettings: Window["LocalSettings"],
   };
 
   const tabs = [
@@ -88,9 +89,8 @@ export const App = (v: Vnode<{}, { active: number }>) => {
     },
   ];
   return {
-    onload() {
-      const configFileContent = printConfig()
-      console.log(configFileContent)
+    async oninit() {
+      Store.localSettings = await window.getConfig();
     },
     view() {
       return m(

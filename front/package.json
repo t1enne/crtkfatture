@@ -6,41 +6,18 @@
   "main": "app/index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --emptyOutDir",
     "preview": "vite preview"
   },
   "dependencies": {
     "construct-ui": "^0.3.3",
-    "mithril": "^2.0.4",
-    "twind": "^0.16.16"
+    "mithril": "^2.2.2",
+    "twind": "^0.16.17"
   },
   "devDependencies": {
-    "@types/mithril": "^2.0.8",
+    "@types/mithril": "^2.0.11",
     "concurrently": "^7.0.0",
     "cross-env": "^7.0.3",
-    "vite": "^2.6.2"
-  },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "mithril_app"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        }
-      ]
-    }
+    "vite": "^2.9.14"
   }
 }

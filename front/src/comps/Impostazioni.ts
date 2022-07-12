@@ -10,17 +10,68 @@ import {
   Icons,
   Input,
   Select,
+  Tag,
 } from "construct-ui";
 import { TabsProps } from "../App";
 
 export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
-  let settings = {};
+  const { localSettings } = window;
+
   return {
-    view() {
+    oninit(v) {
+      this.state = localSettings;
+    },
+    view(v) {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
         m("h1", { class: tw`text-xl font-bold mb-4` }, "Impostazioni"),
+        m(Form, {
+          // gutter: 15,
+          onsubmit(e) {
+            e.preventDefault();
+            const { target } = e;
+            const inputs = target.elements;
+            const values = <Record<keyof Window["localSettings"], string>> {};
+            window.localSettings.venditori.push(inputs[0].value);
+          },
+        }, [
+          m(
+            FormGroup,
+            m(FormLabel, { for: "venditore" }, "Aggiungi Venditore"),
+            m(
+              ControlGroup,
+              { class: tw`flex` },
+              m(Input, {
+                // class: tw`block w-48`,
+                minlength: 1,
+                maxlength: 10,
+                name: "venditore",
+                id: "venditore",
+                contentLeft: m(Icon, { name: Icons.USER }),
+              }),
+              m(Button, {
+                intent: "primary",
+                type: "submit",
+                label: m(Icon, { name: Icons.PLUS }),
+              }),
+            ),
+          ),
+          m(
+            "div.seller-tags",
+            {
+              class: tw`flex flex-wrap py-4`,
+            },
+            localSettings?.venditori
+              .map((venditore) =>
+                m(Tag, {
+                  label: venditore,
+                  rounded: true,
+                  size: "sm",
+                })
+              ),
+          ),
+        ]),
         m(
           Form,
           {
@@ -31,15 +82,16 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
               const inputs = Array.from(target.elements);
               inputs.forEach((input: HTMLInputElement) => {
                 const { name, value } = input;
-                settings[name] = value;
-                localStorage[name] = settings[name];
+                window.localSettings[name] = value;
+                console.log(window.localSettings);
               });
-              location.reload();
+              // location.reload();
             },
           },
           m(
             FormGroup,
             {
+              class: tw`flex flex-col`,
               span: {
                 xs: 12,
                 sm: 12,
@@ -57,31 +109,23 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
             //   })
             // ],
             [
-              m(FormLabel, { for: "dataPath" }, "Negozio"),
+              m(FormLabel, { for: "shop" }, "Negozio"),
               m(
                 ControlGroup,
                 { class: tw`block` },
                 m(Select, {
                   class: tw`block w-48`,
                   name: "shop",
-                  options: [
-                    "GHERLINDA",
-                    "ROMAEST",
-                    "GLOBO",
-                    "PORTE DI CATANIA",
-                    "CASAMASSIMA",
-                    "FIUMARA",
-                    "CITTAFIERA",
-                  ],
-                  value: localStorage.shop || "GHERLINDA",
+                  options: this.state.shops,
+                  value: this.state.shop,
                 }),
               ),
             ],
             m(Button, {
-              class: tw`mt-8 float-right`,
+              class: tw`mt-8 self-center`,
               type: "submit",
-              label: "Applica",
-              intent: "primary",
+              label: "Salva Impostazioni",
+              intent: "positive",
             }),
           ),
         ),
