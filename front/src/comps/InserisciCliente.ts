@@ -124,7 +124,8 @@ export const InserisciCliente = (
     { selectedRegion: string; localSettings: Window["localSettings"] }
   >,
 ) => {
-  // let ivaFour = false;
+  const { localSettings } = v.attrs.store
+  console.log({ localSettings, store: v.attrs.store})
   const clientGroup: Stream<string> = stream("");
 
   const clientUserInput: InputConfType = {
@@ -298,14 +299,8 @@ export const InserisciCliente = (
   ];
 
   return {
-    oncreate() {
-      v.state.localSettings = v.attrs.store.localSettings != undefined
-        ? v.attrs.store.localSettings
-        : window.localSettings;
-
-      if (!v.state.localSettings) {
-        console.error("couldn't load local settings in cliente");
-      }
+    oninit() {
+      console.log(localSettings)
     },
     view() {
       return m(

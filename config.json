@@ -1,5 +1,5 @@
 {
-  "shop": "ORIO AL SERIO",
+  "shop": "GLOBO",
   "shops": [
     "ROMAEST",
     "FIUMARA",
@@ -9,9 +9,10 @@
     "PORTE DI CATANIA",
     "GHERLINDA"
   ],
-  "venditore": "",
+  "venditore": "Nazir",
   "venditori": [
-    "Iman"
+    "Iman",
+    "Nazir"
   ],
   "regioni": [
     "PUGLIA",

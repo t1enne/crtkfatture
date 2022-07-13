@@ -72,38 +72,37 @@ const Store: StoreInterface = {
   localSettings: window.localSettings,
 };
 
-export const App = (v: Vnode<{}, { active: number, tabs: any[] }>) => {
+const tabs = [
+  {
+    tabView: InserisciCliente,
+    label: [m(Icon, { name: Icons.USER }), ""],
+  },
+  {
+    tabView: InserisciArticoli,
+    label: [m(Icon, { name: Icons.DOLLAR_SIGN }), ""],
+  },
+  {
+    tabView: Impostazioni,
+    label: [m(Icon, { name: Icons.SETTINGS }), m(``, "")],
+  },
+]
+
+export const App = (v: Vnode<{}, { active: number }>) => {
   return {
-    tabs: [],
     async oninit() {
+      console.log('init of App');
       const configContent = await window.fetchConfigFileContent();
       Store.localSettings = JSON.parse(configContent);
-      console.log('init of App');
-
-      v.state.tabs = [
-        {
-          tabView: m(InserisciCliente, {
-            active: Store.activeTab === 0,
-            store: Store,
-          }),
-          label: [m(Icon, { name: Icons.USER }), ""],
-        },
-        {
-          tabView: m(InserisciArticoli, {
-            active: Store.activeTab === 1,
-            store: Store,
-          }),
-          label: [m(Icon, { name: Icons.DOLLAR_SIGN }), ""],
-        },
-        // { label: [m(Icon, { name: Icons.ARCHIVE }), m(``, '')] },
-        {
-          tabView: m(Impostazioni, { active: Store.activeTab === 2, store: Store }),
-          label: [m(Icon, { name: Icons.SETTINGS }), m(``, "")],
-        },
-      ];
-      m.redraw()
+      if (!Store.localSettings) {
+        console.log("setting from window");
+        Store.localSettings = window.localSettings
+      }
+    },
+    onupdate() {
+      console.log(Store.localSettings);
     },
     view() {
+
       return m(
         ".app_root",
         {
@@ -121,7 +120,7 @@ export const App = (v: Vnode<{}, { active: number, tabs: any[] }>) => {
             size: "sm",
             class: tw`mb-4 grid grid-cols-3`,
           }, [
-            v.state.tabs.map((tab, i) => {
+            tabs.map((tab, i) => {
               return m(TabItem, {
                 key: i,
                 label: tab.label,
@@ -138,8 +137,11 @@ export const App = (v: Vnode<{}, { active: number, tabs: any[] }>) => {
             {
               class: tw`overflow-hidden`,
             },
-            v.state.tabs.map((tab, i) => {
-              return tab.tabView;
+            [0, 1, 2].map((i: number) => {
+              return m(tabs[i].tabView, {
+                active: Store.activeTab === i,
+                store: Store
+              })
             }),
           ),
           m(Toasts, {

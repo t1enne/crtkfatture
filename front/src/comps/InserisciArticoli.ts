@@ -6,7 +6,6 @@ import {
   Card,
   ControlGroup,
   Form,
-  FormLabel,
   Icon,
   Icons,
   Input,
@@ -68,7 +67,7 @@ const parseNewClient = (client: ClientInterface) => {
   const arr = [];
   const newHeader = `* ${client.header}`;
 
-  arr.push("\n", newHeader);
+  arr.push(newHeader);
 
   for (const key in client) {
     let value = client[key];
@@ -84,8 +83,6 @@ const parseNewClient = (client: ClientInterface) => {
 const InserisciArticoli = (
   v: Vnode<TabsProps, { localSettings: Window["localSettings"] }>,
 ) => {
-
-  const { localSettings } = v.attrs.store
   let note = stream<string>(""),
     scontrino = stream<number>(0),
     lineItems: LineItem[] = [];
@@ -98,7 +95,7 @@ const InserisciArticoli = (
         return qty() * price();
       });
     lineItems.push({ qty, art, price, total });
-    console.log(lineItems)
+    m.redraw()
   };
 
   const getTotals = (tax?: number) => {
@@ -113,7 +110,6 @@ const InserisciArticoli = (
   };
 
   const writeOrderText = (store: StoreInterface, items: LineItem[]) => {
-
     const lineItemsTexts = items.map((l) => {
       let { qty, art, price } = l;
       if (qty() < 10 && qty().toString().length < 2) {
@@ -136,12 +132,13 @@ const InserisciArticoli = (
         .map((l) => l.join("\t"))
         .join("\n"),
       `STATUS   PRONTO ${getTotals(1).pieces} COLLI`,
-      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings?.shop || ""
+      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${store.localSettings?.shop
       } € ${(parseFloat(getTotals(1.22).price) *
         v.attrs.store.iva).toFixed(2)
       } ${note()}`,
-      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings?.shop || ""
+      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${store.localSettings?.shop
       }`,
+      store.localSettings?.venditore,
     ].join("\n");
 
     return text;
@@ -161,16 +158,18 @@ const InserisciArticoli = (
   };
 
   return {
-    oncreate() {
-      console.log('init of InserisciArticoli')
+    oninit() {
       addLineItem();
+    },
+    oncreate() {
+      console.log(v.attrs.store.localSettings);
       m.redraw()
     },
     view() {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
-        m("h1", { class: tw`text-xl font-bold mb-4` }, "Inserisci Articoli"),
+        m("h1", { class: tw`text-xl font-bold mb-4` }, v.attrs.store.localSettings?.shop),
         m(Overlay, {
           isOpen: overl.open,
           content: m("", { style: overl.style }, [
@@ -192,6 +191,7 @@ const InserisciArticoli = (
           Form,
           {
             onsubmit: (e: SubmitEvent) => {
+              console.log(v.attrs.store.localSettings)
               e.preventDefault();
             },
           },
@@ -282,13 +282,13 @@ const InserisciArticoli = (
             ControlGroup,
             { class: tw`w-full ` },
             m(Select, {
-              options: localSettings?.venditori,
+              options: v.attrs.store.localSettings?.venditori,
               defaultValue: "",
               required: true,
-              value: localSettings?.venditore,
+              value: v.attrs.store.localSettings?.venditore,
               onchange: (e: any) => {
-                if (localSettings) {
-                  localSettings.venditore = e.target.value;
+                if (v.attrs.store.localSettings) {
+                  v.attrs.store.localSettings.venditore = e.target.value;
                 }
               },
             }),
