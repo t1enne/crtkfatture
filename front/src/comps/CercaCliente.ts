@@ -1,13 +1,6 @@
 import m, { Vnode } from "mithril";
 import { tw } from "twind";
-import {
-  ControlGroup,
-  Icon,
-  Icons,
-  Input,
-  List,
-  ListItem,
-} from "construct-ui";
+import { ControlGroup, Icon, Icons, Input, List, ListItem } from "construct-ui";
 import { ClientInterface, selTab, TabsProps } from "../App";
 
 export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
@@ -15,12 +8,9 @@ export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
   let searchQuery = "";
   return {
     async oninit() {
-      // if (localStorage.dataPath && localStorage.dataPath != '') {
-      // @ts-ignore
-      v.attrs.store.clients = await fetchClients()
-      clients = v.attrs.store.clients
-      console.log({ clients: v.attrs.store.clients })
-      // }
+      //@ts-ignore
+      v.attrs.store.clients = await fetchClients();
+      clients = v.attrs.store.clients;
     },
     async onupdate() {
       if (localStorage.dataPath && clients?.length == 0) await sendReadEvent();
@@ -31,9 +21,10 @@ export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
       }, [
         m("h1", { class: tw`text-xl font-bold mb-4` }, "Cerca Cliente"),
         m(
-          ControlGroup, {
-          class: tw`flex-col w-96`
-        },
+          ControlGroup,
+          {
+            class: tw`flex-col w-96`,
+          },
           m(Input, {
             contentLeft: m(Icon, { name: Icons.SEARCH }),
             placeholder: "Ricerca Cliente",
@@ -69,12 +60,12 @@ export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
                     onclick(e) {
                       // v.attrs.store.inputs = fItem;
                       for (let f in v.attrs.store.inputs) {
-                        v.attrs.store.inputs[f] = fItem[f]
+                        v.attrs.store.inputs[f] = fItem[f];
                       }
                       v.attrs.store.selectedClient = fItem;
                       v.attrs.store.newClient = undefined;
-                      if (fItem.TIPO == "TESTER") { v.attrs.store.iva = 1.04 }
-                      console.log(fItem)
+                      if (fItem.TIPO == "TESTER") v.attrs.store.iva = 1.04;
+                      console.log(fItem);
                       selTab(2, v.attrs.store);
                     },
                     contentRight: m(Icon, { name: Icons.ARROW_RIGHT }),

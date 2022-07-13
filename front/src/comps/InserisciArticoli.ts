@@ -64,15 +64,18 @@ const euroTag = m("tag", {
 
 const parseNewClient = (client: ClientInterface) => {
   if (!client) return [];
+  console.log(client);
   const arr = [];
-  const newHeader = `*${client.header}`;
+  const newHeader = `* ${client.header}`;
 
   arr.push("\n", newHeader);
 
   for (const key in client) {
-    const value = client[key];
-
-    if (value != "") arr.push(`${key}${addSpaces(key)}${value}`);
+    let value = client[key];
+    if (key === "PAGAMENTO" && !value) value = "";
+    if (value && value != "" && key != "header") {
+      arr.push(`${key}${addSpaces(key)}${value}`);
+    }
   }
 
   return arr.join("\n");
@@ -141,6 +144,7 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
 
     const text = [
       parseNewClient(store.newClient),
+      "\n\n",
       lineItemsTexts
         .map((l) => l.join("\t"))
         .join("\n"),
@@ -197,7 +201,6 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
           {
             onsubmit: (e: SubmitEvent) => {
               e.preventDefault();
-              console.log(e);
             },
           },
           m(
@@ -272,10 +275,13 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
               ],
               defaultValue: "",
               required: true,
-              value: v.attrs.store.inputs.PAGAMENTO,
+              value: v.attrs.store.newClient?.PAGAMENTO || "",
               onchange(e) {
-                v.attrs.store.inputs.PAGAMENTO =
-                  (e.target as HTMLInputElement).value;
+                if (v.attrs.store.newClient) {
+                  v.attrs.store.newClient.PAGAMENTO =
+                    (e.target as HTMLInputElement).value;
+                  console.log(v.attrs.store.newClient);
+                }
               },
             }),
           ),

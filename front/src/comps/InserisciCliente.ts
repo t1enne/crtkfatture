@@ -184,6 +184,7 @@ const handleClientGroupChange = (
 
   if (cg == "DITTA INDIVIDUALE") {
     ivaSwitch.checked = false;
+    store.iva = 1.22;
     ivaSwitch.disabled = true;
 
     setAttributes(".input-PIVA input", {
@@ -207,6 +208,7 @@ const handleClientGroupChange = (
     });
 
     ivaSwitch.checked = false;
+    store.iva = 1.22;
     ivaSwitch.disabled = true;
 
     AppToaster.notify({
@@ -237,7 +239,7 @@ const handleClientGroupChange = (
 };
 
 export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
-  let ivaFour = false;
+  // let ivaFour = false;
   const clientGroup: Stream<string> = stream("");
 
   const formGroups: {
@@ -314,16 +316,20 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
                 class: "iva_switch",
                 disabled: clientGroup() != "PRIVATO",
                 onchange() {
-                  ivaFour = !ivaFour;
-                  ivaFour
-                    ? (v.attrs.store.iva = 1.04)
-                    : (v.attrs.store.iva = 1.22);
+                  let { attrs: { store: { iva } } } = v;
+                  if (iva === 1.04) v.attrs.store.iva = 1.22;
+                  else iva = v.attrs.store.iva = 1.04;
+                  console.log(iva);
+                  // ivaFour = !ivaFour;
+                  // ivaFour
+                  //   ? (v.attrs.store.iva = 1.04)
+                  //   : (v.attrs.store.iva = 1.22);
 
-                  if (ivaFour) {
-                    v.attrs.store.inputs.TIPO = "TESTER";
-                  } else {
-                    v.attrs.store.inputs.TIPO = undefined;
-                  }
+                  // if (ivaFour) {
+                  //   v.attrs.store.inputs.TIPO = "TESTER";
+                  // } else {
+                  //   v.attrs.store.inputs.TIPO = undefined;
+                  // }
                 },
               }),
             ),
@@ -394,7 +400,7 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
 const getInputVnode = (
   clientUserInput: InputConfType,
   field: ClientFormField,
-  v: Vnode<TabsProps, {}>,
+  v: Vnode<TabsProps, { selectedRegion: string }>,
 ) => {
   const input = clientUserInput[field];
   const isSelect = input.options ? true : false;
@@ -409,12 +415,9 @@ const getInputVnode = (
           class: `input-${field}`,
           id: field,
           name: field,
-          value: v.attrs.store.inputs[field],
-          oncreate() {
-            input.value = "";
-            input.value = new Date().toString();
-            v.attrs.store.inputs[field] = input.default;
-          },
+          value: v.state.selectedRegion,
+          oncreate: (e: any) => v.state.selectedRegion = "",
+          onchange: (e: any) => v.state.selectedRegion = e.target.value,
         }),
       ];
     case false:
@@ -476,7 +479,6 @@ const handleSubmit = (
   e.preventDefault();
 
   const target = e.target as HTMLFormElement;
-  console.log(target);
   const inputs = target.elements;
   const values = <Record<ClientFormField, string>> {};
 
@@ -504,7 +506,6 @@ const handleSubmit = (
     TRASPORTA: "DESTINATARIO",
     START: "11/10/2022 ROMAEST",
   };
-  console.log(v.attrs.store.newClient);
 
   selTab(1, v.attrs.store);
 };

@@ -1,5 +1,5 @@
 {
-  "shop": "PORTE DI CATANIA",
+  "shop": "GLOBO",
   "shops": [
     "ROMAEST",
     "FIUMARA",
@@ -10,7 +10,9 @@
     "GHERLINDA"
   ],
   "venditore": "",
-  "venditori": [],
+  "venditori": [
+    "Nazir"
+  ],
   "regioni": [
     "PUGLIA",
     "BASILICATA",

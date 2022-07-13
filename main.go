@@ -22,7 +22,7 @@ var fs embed.FS
 // operations, but for more complex cases one should use proper synchronization.
 type Config struct {
 	Shop    string   `json:"shop"`
-	Shops   string   `json:"shops"`
+	Shops   []string `json:"shops"`
 	Regioni []string `json:"regioni"`
 	From    string   `json:"from"`
 	To      string   `json:"to"`
