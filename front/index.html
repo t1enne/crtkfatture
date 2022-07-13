@@ -3,18 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/src/icons/favicon.ico" />
     <title>CortekStore Fatture</title>
   </head>
 
   <body onload="start()">
     <div id="app"></div>
     <script>
-      // window.updateConfigFile = async (settings) => {
-      //   const updated = await updateConfigFile(JSON.parse(settings));
-      //   if (updated) return true;
-      // };
       let settings;
       window.getConfig = () => settings;
+      window.writeConfigFile = writeConfigFile;
 
       (async () => {
         settings = JSON.parse(await fetchConfigFileContent());

@@ -16,12 +16,11 @@ input, select {
 
 
 .tab:nth-child(1) input:focus:invalid {
-  border: 1px solid red;
+  border-color: red;
 }
 
 .tab:nth-child(1) input:focus:valid {
-  border: 1px solid green !important;
-  box-shadow: 0 0 1px 1px green;
+  border-color: green;
 }
 
 .tab {

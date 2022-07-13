@@ -15,7 +15,20 @@ import { selTab, StoreInterface, TabsProps } from "../App";
 import { setAttributes } from "../utils";
 import { AppToaster } from "./AppToaster";
 
-type ClientFormField = "Indirizzo" | "Città" | "CAP" | "Provincia" | "Regione" | "Denominazione" | "P_IVA" | "Cod_Fiscale" | "Cod_Univoco" | "Email" | "PEC" | "Contatto" | "Telefono"
+type ClientFormField =
+  | "Indirizzo"
+  | "Città"
+  | "CAP"
+  | "Provincia"
+  | "Regione"
+  | "Denominazione"
+  | "P_IVA"
+  | "Cod_Fiscale"
+  | "Cod_Univoco"
+  | "Email"
+  | "PEC"
+  | "Contatto"
+  | "Telefono";
 
 type InputType = {
   info?: string;
@@ -30,25 +43,24 @@ type InputType = {
     disabled?: boolean;
   };
   value?: string;
-  span?: number
-}
+  span?: number;
+};
 
-export type InputConfType = Record<ClientFormField, InputType>
+export type InputConfType = Record<ClientFormField, InputType>;
 
 // change html element's required attribute
 
-
 const clientUserInput: InputConfType = {
-  'Denominazione': {
+  "Denominazione": {
     info: "Mario Rossi O MIRAUTO SRL",
     props: {
       pattern: ".*[^\\.]*",
       // pattern: ".*[^\\.]*#\\s+\\w+",
       required: true,
     },
-    span: 12
+    span: 12,
   },
-  'P_IVA': {
+  "P_IVA": {
     info: "Codice a 11 numeri o vuoto nel caso di privati",
     props: {
       type: "tel",
@@ -56,55 +68,66 @@ const clientUserInput: InputConfType = {
       pattern: "[0-9]{11}",
       required: true,
     },
-    span: 12
+    span: 12,
   },
-  'Cod_Fiscale': {
-    info: "Per le società è spesso uguale a PIVA. Negli altri casi CF alfanumerico",
+  "Cod_Fiscale": {
+    info:
+      "Per le società è spesso uguale a PIVA. Negli altri casi CF alfanumerico",
     props: {
       required: true,
+      minlength: 11,
+      maxlength: 16,
       pattern: `([A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]|\\d{11})`,
     },
-    span: 12
+    span: 12,
   },
-  'Indirizzo': {
+  "Indirizzo": {
     info: "VIA G.ALBINI, 19",
     props: {
       required: true,
       pattern: ".*",
       // pattern: ".*#\\s+[0-9]{5}\\s+#.*#\\s+\\w{2}\\s+#.*",
     },
-    span: 6
+    span: 6,
   },
-  'CAP': {
+  "CAP": {
+    info: "06123",
     props: {
       required: true,
-      pattern: "[0-9]*"
+      minlength: 5,
+      maxlength: 5,
+      pattern: "[0-9]{5}",
     },
-    span: 4
+    span: 4,
   },
-  'Città': {
+  "Città": {
+    info: "PERUGIA",
     props: {
       required: true,
-      pattern: "\\w+"
+      pattern: "\\w+",
     },
-    span: 6
+    span: 6,
   },
-  'Provincia': {
+  "Provincia": {
+    info: "PG",
     props: {
       required: true,
-      pattern: "\\w{2}"
+      minlength: 2,
+      maxlength: 2,
+      pattern: "\\w{2}",
     },
-    span: 3
+    span: 3,
   },
-  'Regione': {
+  "Regione": {
+    info: "UMBRIA",
     props: {
       required: true,
     },
-    options: ["LAZIO", "LOMBARDIA", "UMBRIA"],
+    options: window.localSettings.regioni,
     default: "",
-    span: 3
+    span: 3,
   },
-  'Cod_Univoco': {
+  "Cod_Univoco": {
     info: "Codice a 7 car alfanumerici o ESENTE",
     props: {
       required: true,
@@ -113,9 +136,9 @@ const clientUserInput: InputConfType = {
       minlength: 6,
       pattern: "(\\w{7}|esente|Esente|ESENTE)",
     },
-    span: 6
+    span: 6,
   },
-  'PEC': {
+  "PEC": {
     info: "Per la fattura elettronica serve o il CODUNIVOCO o la PEC",
     props: {
       required: true,
@@ -123,13 +146,13 @@ const clientUserInput: InputConfType = {
       pattern: ".*@.*\\.\\w*",
     },
   },
-  'Email': {
+  "Email": {
     info: "Mail del richiedente fatture",
     props: {
       pattern: ".*@.*\\.\\w*",
     },
   },
-  'Contatto': {
+  "Contatto": {
     info: "Nome e Cognome del richiedente fattura. Oppure ...",
     props: {
       required: true,
@@ -137,7 +160,7 @@ const clientUserInput: InputConfType = {
       pattern: "..*",
     },
   },
-  'Telefono': {
+  "Telefono": {
     info: "Tel del richiedente fattura",
     props: {
       type: "tel",
@@ -145,28 +168,18 @@ const clientUserInput: InputConfType = {
       pattern: "..*",
     },
   },
-  // 'Pagamento': {
-  //   options: [
-  //     "CARTA",
-  //     "CONTANTI",
-  //     "BONIFICO",
-  //     "ASSEGNO_CC",
-  //     "ASSEGNO_CIRCOLARE",
-  //   ],
-  //   default: "",
-  // },
 };
 
 const handleClientGroupChange = (
   e: InputEvent,
   store: StoreInterface,
-  clientGroup: Stream<string>
+  clientGroup: Stream<string>,
 ) => {
   const cg = (e.target as HTMLInputElement).value;
   clientGroup(cg);
 
   const ivaSwitch = document.querySelector(
-    ".iva_switch input"
+    ".iva_switch input",
   ) as HTMLInputElement;
 
   if (cg == "DITTA INDIVIDUALE") {
@@ -174,12 +187,12 @@ const handleClientGroupChange = (
     ivaSwitch.disabled = true;
 
     setAttributes(".input-PIVA input", {
-      required: true
+      required: true,
     });
 
     setAttributes(".input-PEC input", {
-      required: true
-    })
+      required: true,
+    });
 
     AppToaster.notify({
       msg: `Le ditte indivuduali riportano:
@@ -189,10 +202,9 @@ const handleClientGroupChange = (
       intent: "warning",
     });
   } else if (cg == "SOCIETA'") {
-
     setAttributes(".input-PEC input", {
-      required: true
-    })
+      required: true,
+    });
 
     ivaSwitch.checked = false;
     ivaSwitch.disabled = true;
@@ -202,17 +214,16 @@ const handleClientGroupChange = (
         In rari casi il CF puo' essere di 11 numeri`,
       intent: "warning",
     });
-
   } else {
     // privato
 
     setAttributes(".input-PIVA input", {
-      required: false
-    })
+      required: false,
+    });
 
     setAttributes(".input-PEC input", {
-      required: false
-    })
+      required: false,
+    });
 
     store.inputs.CODUNIVOCO = "ESENTE";
     store.inputs.PIVA = "";
@@ -230,34 +241,34 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
   const clientGroup: Stream<string> = stream("");
 
   const formGroups: {
-    title: string,
-    fields: ClientFormField[]
+    title: string;
+    fields: ClientFormField[];
   }[] = [
-      {
-        title: 'Dati aziendali/anagrafici',
-        fields: [
-          'Denominazione',
-          'P_IVA',
-          'Cod_Fiscale',
-          'Cod_Univoco',
-          'PEC'
+    {
+      title: "Dati aziendali/anagrafici",
+      fields: [
+        "Denominazione",
+        "P_IVA",
+        "Cod_Fiscale",
+        "Cod_Univoco",
+        "PEC",
+      ],
+    },
+    {
+      title: "Indirizzo",
+      fields: [
+        "Indirizzo",
+        "Città",
+        "CAP",
+        "Provincia",
+        "Regione",
+        "Contatto",
+        "Telefono",
+        "Email",
+      ],
+    },
+  ];
 
-        ]
-      },
-      {
-        title: 'Indirizzo',
-        fields: [
-          'Indirizzo',
-          'Città',
-          'CAP',
-          'Provincia',
-          'Regione',
-          'Contatto',
-          'Telefono',
-          'Email'
-        ]
-      },
-    ]
   return {
     view() {
       return m(
@@ -267,7 +278,9 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
         },
         [
           m("h1", { class: tw`text-xl font-bold mb-4` }, "Inserisci Cliente"),
-          m('style', `
+          m(
+            "style",
+            `
             .cui-form {
               max-width: 700px;
               padding-left: .5rem;
@@ -280,19 +293,22 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
             .cui-form .cui-form-label {
               text-transform: capitalize;
             }
-            `),
+            `,
+          ),
           m(
             Form,
             {
-              class: tw('px-6'),
-              onsubmit: (e: SubmitEvent) => handleSubmit(e, v)
+              class: tw("px-6"),
+              onsubmit: (e: SubmitEvent) => handleSubmit(e, v),
             },
-            m(FormGroup, {
-              span: {
-                xs: 12,
-                md: 6,
-              }
-            },
+            m(
+              FormGroup,
+              {
+                span: {
+                  xs: 12,
+                  md: 6,
+                },
+              },
               m(Switch, {
                 label: "IVA al 4%",
                 class: "iva_switch",
@@ -308,18 +324,17 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
                   } else {
                     v.attrs.store.inputs.TIPO = undefined;
                   }
-                  AppToaster.notify({
-                    msg: `IVA impostata al ${ivaFour ? 4 : 22}%`,
-                    intent: "warning",
-                  });
                 },
-              })),
-            m(FormGroup, {
-              span: {
-                xs: 12,
-                md: 6,
-              }
-            },
+              }),
+            ),
+            m(
+              FormGroup,
+              {
+                span: {
+                  xs: 12,
+                  md: 6,
+                },
+              },
               m(Select, {
                 required: true,
                 value: clientGroup(),
@@ -327,19 +342,23 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
                 onchange(e: InputEvent) {
                   handleClientGroupChange(e, v.attrs.store, clientGroup);
                 },
-              })),
-            formGroups.map(group => {
-              return group.fields.map(field => {
+              }),
+            ),
+            formGroups.map((group) => {
+              return group.fields.map((field) => {
                 return m(FormGroup, {
                   span: {
                     xs: 12,
                     md: clientUserInput[field].span || 12,
-                  }
+                  },
                 }, [
-                  m(FormLabel, { for: field, title: clientUserInput[field].info }, field),
-                  getInputVnode(clientUserInput, field, v)
-                ])
-              })
+                  m(FormLabel, {
+                    for: field,
+                    title: clientUserInput[field].info,
+                  }, field),
+                  getInputVnode(clientUserInput, field, v),
+                ]);
+              });
             }),
             m(
               ".button_wrap",
@@ -361,20 +380,24 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
               m(Button, {
                 type: "submit",
                 label: "Conferma",
-                intent: "primary",
+                intent: "positive",
                 value: v.attrs.store.inputs,
-              })
+              }),
             ),
           ),
-        ]
+        ],
       );
     },
   };
 };
 
-const getInputVnode = (clientUserInput: InputConfType, field: ClientFormField, v: Vnode<TabsProps, {}>) => {
-  const input = clientUserInput[field]
-  const isSelect = input.options ? true : false
+const getInputVnode = (
+  clientUserInput: InputConfType,
+  field: ClientFormField,
+  v: Vnode<TabsProps, {}>,
+) => {
+  const input = clientUserInput[field];
+  const isSelect = input.options ? true : false;
 
   switch (isSelect) {
     case true:
@@ -390,17 +413,17 @@ const getInputVnode = (clientUserInput: InputConfType, field: ClientFormField, v
           oncreate() {
             input.value = "";
             input.value = new Date().toString();
-            v.attrs.store.inputs[field] =
-              input.default;
+            v.attrs.store.inputs[field] = input.default;
           },
         }),
-      ]
+      ];
     case false:
       return m(Input, {
         placeholder: input.info,
         class: `input-${field}`,
         id: field,
         name: field,
+        basic: true,
         disabled: v.attrs.store.selectedClient ? true : false,
         // value: v.attrs.store.inputs[field],
         ...input?.props,
@@ -415,70 +438,73 @@ const getInputVnode = (clientUserInput: InputConfType, field: ClientFormField, v
         //   }
         // },
         onchange(e: InputEvent) {
-          const val = (e.target as HTMLInputElement).value
-          const isValid = new RegExp(clientUserInput[field].props.pattern).test(val)
+          const val = (e.target as HTMLInputElement).value;
+          const isValid = new RegExp(clientUserInput[field].props.pattern).test(
+            val,
+          );
 
           if (field == "Cod_Univoco") {
             if (isValid) {
               setAttributes("#PEC", {
-                required: false
+                required: false,
               });
             } else {
               setAttributes("#PEC", {
-                required: true
+                required: true,
               });
             }
           } else if (field === "PEC") {
             if (isValid) {
               setAttributes("#Cod_Univoco", {
-                required: false
+                required: false,
               });
             } else {
               setAttributes("#Cod_Univoco", {
-                required: true
+                required: true,
               });
             }
           }
         },
-      })
+      });
   }
-}
+};
 
 const handleSubmit = (
   e: SubmitEvent,
-  v: Vnode<TabsProps, {}>
+  v: Vnode<TabsProps, {}>,
 ) => {
-  e.preventDefault()
+  e.preventDefault();
 
   const target = e.target as HTMLFormElement;
-  console.log(target)
+  console.log(target);
   const inputs = target.elements;
-  const values = <Record<ClientFormField, string>>{};
+  const values = <Record<ClientFormField, string>> {};
 
   for (let i = 0; i < inputs.length; i++) {
     const input = inputs[i] as HTMLInputElement;
     values[input.name] = input.value.toUpperCase();
   }
 
-  const addressString = `${values['Indirizzo']} # ${values['CAP']} # ${values['Città']} # ${values['Provincia']} # ${values['Regione']}`
+  const addressString = `${values["Indirizzo"]} # ${values["CAP"]} # ${
+    values["Città"]
+  } # ${values["Provincia"]} # ${values["Regione"]}`;
 
   v.attrs.store.newClient = {
-    header: `${values['Denominazione']} # ${values['Regione']}`,
+    header: `${values["Denominazione"]} # ${values["Regione"]}`,
     INDIRIZZO: addressString,
-    PIVA: values['P_IVA'],
-    CF: values['Cod_Fiscale'],
-    CODUNIVOCO: values['Cod_Univoco'],
-    PEC: values['PEC'],
-    EMAIL: values['EMAIL'],
-    CONTATTO: values['Contatto'],
+    PIVA: values["P_IVA"],
+    CF: values["Cod_Fiscale"],
+    CODUNIVOCO: values["Cod_Univoco"],
+    PEC: values["PEC"],
+    EMAIL: values["EMAIL"],
+    CONTATTO: values["Contatto"],
     PAGAMENTO: "CARTA",
-    TEL: values['Telefono'],
-    LISTINO: 'L4',
-    TRASPORTA: 'DESTINATARIO',
-    START: '11/10/2022 ROMAEST'
-  }
-  console.log(v.attrs.store.newClient)
+    TEL: values["Telefono"],
+    LISTINO: "L4",
+    TRASPORTA: "DESTINATARIO",
+    START: "11/10/2022 ROMAEST",
+  };
+  console.log(v.attrs.store.newClient);
 
   selTab(1, v.attrs.store);
-
 };

@@ -13,11 +13,10 @@ import {
   Tag,
 } from "construct-ui";
 import { TabsProps } from "../App";
-
+import { AppToaster } from "./AppToaster";
 
 export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
   const { localSettings } = window;
-  
 
   return {
     oninit() {
@@ -30,9 +29,9 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
         m("h1", { class: tw`text-xl font-bold mb-4` }, "Impostazioni"),
         m(Form, {
           // gutter: 15,
-          onsubmit(e: any) {
+          async onsubmit(e: any) {
             e.preventDefault();
-            const { target }  = e;
+            const { target } = e;
             const inputs = target.elements;
             window.localSettings.venditori.push(inputs[0].value);
           },
@@ -77,16 +76,28 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
           Form,
           {
             gutter: 15,
-            onsubmit(e: SubmitEvent) {
+            async onsubmit(e: SubmitEvent) {
               e.preventDefault();
               const target = e.target as HTMLFormElement;
               const inputs = Array.from(target.elements);
               inputs.forEach((input: HTMLInputElement) => {
                 const { name, value } = input;
                 window.localSettings[name] = value;
-                console.log(window.localSettings);
               });
-              // location.reload();
+              const saved = await window.writeConfigFile(
+                JSON.stringify(window.localSettings, null, 2),
+              );
+              if (saved) {
+                AppToaster.notify({
+                  intent: "positive",
+                  msg: "Impostazioni salvate!",
+                });
+              } else {
+                AppToaster.notify({
+                  intent: "negative",
+                  msg: "Non sono riuscito a scrivere il file!",
+                });
+              }
             },
           },
           m(

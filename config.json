@@ -1,5 +1,5 @@
 {
-  "shop": "GHERLINDA",
+  "shop": "PORTE DI CATANIA",
   "shops": [
     "ROMAEST",
     "FIUMARA",
@@ -10,9 +10,7 @@
     "GHERLINDA"
   ],
   "venditore": "",
-  "venditori": [
-    "Nazir"
-  ],
+  "venditori": [],
   "regioni": [
     "PUGLIA",
     "BASILICATA",
@@ -36,5 +34,6 @@
     "VENETO"
   ],
   "from": "incassi@cortekstore.com",
-  "to": "incassi@cortekstore.com"
+  "to": "incassi@cortekstore.com",
+  "": ""
 }

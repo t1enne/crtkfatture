@@ -22,6 +22,7 @@ var fs embed.FS
 // operations, but for more complex cases one should use proper synchronization.
 type Config struct {
 	Shop    string   `json:"shop"`
+	Shops   string   `json:"shops"`
 	Regioni []string `json:"regioni"`
 	From    string   `json:"from"`
 	To      string   `json:"to"`
@@ -118,6 +119,7 @@ func main() {
 	})
 
 	ui.Bind("fetchConfigFileContent", func() string {
+		log.Println("fetching config file")
 		return configFileContent
 	})
 
@@ -125,9 +127,14 @@ func main() {
 		sendMail(config)
 	})
 
-	ui.Bind("updateConfigFile", func() bool {
-
-		return true
+	ui.Bind("writeConfigFile", func(fileContent string) bool {
+		bytes := []byte(fileContent)
+		err := os.WriteFile(`./config.json`, bytes, 0644)
+		if err != nil {
+			return false
+		} else {
+			return true
+		}
 	})
 
 	// Load HTML.
