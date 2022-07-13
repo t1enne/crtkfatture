@@ -18,27 +18,24 @@ import { AppToaster } from "./AppToaster";
 export const Impostazioni = (
   v: Vnode<TabsProps, { localSettings: Window["localSettings"] }>,
 ) => {
+  const { localSettings } = v.attrs.store
+  
   return {
-    oninit(v) {
-      const { localSettings } = v.attrs.store;
-
-      if (!localSettings) {
-        console.error("couldn't load local settings in impostazioni");
-      }
-      v.state.localSettings = localSettings;
+    oninit() {
+      console.log('init of Settings')
     },
-    view(v) {
+    view() {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
         m("h1", { class: tw`text-xl font-bold mb-4` }, "Impostazioni"),
         m(Form, {
-          // gutter: 15,
           async onsubmit(e: any) {
             e.preventDefault();
             const { target } = e;
             const inputs = target.elements;
-            v.state.localSettings.venditori.push(inputs[0].value);
+            localSettings.venditori.push(inputs[0].value);
+            m.redraw()
           },
         }, [
           m(
@@ -67,7 +64,7 @@ export const Impostazioni = (
             {
               class: tw`flex flex-wrap pb-4`,
             },
-            v.state.localSettings.venditori
+            localSettings.venditori
               .map((venditore) =>
                 m(Tag, {
                   label: venditore,
@@ -87,10 +84,10 @@ export const Impostazioni = (
               const inputs = Array.from(target.elements);
               inputs.forEach((input: HTMLInputElement) => {
                 const { name, value } = input;
-                v.state.localSettings[name] = value;
+                localSettings[name] = value;
               });
               const saved = await window.writeConfigFile(
-                JSON.stringify(v.state.localSettings, null, 2),
+                JSON.stringify(localSettings, null, 2),
               );
               if (saved) {
                 AppToaster.notify({
@@ -123,8 +120,8 @@ export const Impostazioni = (
                 m(Select, {
                   class: tw`block w-48`,
                   name: "shop",
-                  options: v.state.localSettings?.shops || [],
-                  value: v.state.localSettings?.shop || "",
+                  options: localSettings?.shops || [],
+                  value: localSettings?.shop || "",
                 }),
               ),
             ],

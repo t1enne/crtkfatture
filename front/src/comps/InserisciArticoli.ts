@@ -84,6 +84,8 @@ const parseNewClient = (client: ClientInterface) => {
 const InserisciArticoli = (
   v: Vnode<TabsProps, { localSettings: Window["localSettings"] }>,
 ) => {
+
+  const { localSettings } = v.attrs.store
   let note = stream<string>(""),
     scontrino = stream<number>(0),
     lineItems: LineItem[] = [];
@@ -96,6 +98,7 @@ const InserisciArticoli = (
         return qty() * price();
       });
     lineItems.push({ qty, art, price, total });
+    console.log(lineItems)
   };
 
   const getTotals = (tax?: number) => {
@@ -110,7 +113,6 @@ const InserisciArticoli = (
   };
 
   const writeOrderText = (store: StoreInterface, items: LineItem[]) => {
-    const { localSettings } = store;
 
     const lineItemsTexts = items.map((l) => {
       let { qty, art, price } = l;
@@ -134,14 +136,11 @@ const InserisciArticoli = (
         .map((l) => l.join("\t"))
         .join("\n"),
       `STATUS   PRONTO ${getTotals(1).pieces} COLLI`,
-      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${
-        localSettings?.shop || ""
-      } € ${
-        (parseFloat(getTotals(1.22).price) *
-          v.attrs.store.iva).toFixed(2)
+      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings?.shop || ""
+      } € ${(parseFloat(getTotals(1.22).price) *
+        v.attrs.store.iva).toFixed(2)
       } ${note()}`,
-      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${
-        localSettings?.shop || ""
+      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings?.shop || ""
       }`,
     ].join("\n");
 
@@ -162,17 +161,12 @@ const InserisciArticoli = (
   };
 
   return {
-    localSettings: {},
-    async oncreate(v) {
+    oncreate() {
+      console.log('init of InserisciArticoli')
       addLineItem();
-      const { localSettings } = v.attrs.store;
-      v.state.localSettings = localSettings;
-
-      if (!v.state.localSettings) {
-        console.error("couldn't load local settings in articoli");
-      }
+      m.redraw()
     },
-    view(v) {
+    view() {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
@@ -288,13 +282,13 @@ const InserisciArticoli = (
             ControlGroup,
             { class: tw`w-full ` },
             m(Select, {
-              options: v.state.localSettings?.venditori,
+              options: localSettings?.venditori,
               defaultValue: "",
               required: true,
-              value: v.state.localSettings?.venditore,
+              value: localSettings?.venditore,
               onchange: (e: any) => {
-                if (v.state.localSettings) {
-                  v.state.localSettings.venditore = e.target.value;
+                if (localSettings) {
+                  localSettings.venditore = e.target.value;
                 }
               },
             }),

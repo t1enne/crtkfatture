@@ -3,7 +3,7 @@ const cl = (input: string | HTMLElement | HTMLElement[], action?: string, classn
   let nodeArray: HTMLElement[] = []
 
   if (typeof input === "string") nodeArray = Array.from(document.querySelectorAll(input))
-  else if (input.constructor === [].constructor) nodeArray = input as HTMLElement[]
+  else if (input instanceof Array) nodeArray = input as HTMLElement[]
   else if (input instanceof HTMLElement) nodeArray.push(input)
   else input ? Array.from(input) : []
 

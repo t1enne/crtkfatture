@@ -72,35 +72,38 @@ const Store: StoreInterface = {
   localSettings: window.localSettings,
 };
 
-export const App = (v: Vnode<{}, { active: number }>) => {
-  let tabs = [
-    {
-      tabView: m(InserisciCliente, {
-        active: Store.activeTab === 0,
-        store: Store,
-      }),
-      label: [m(Icon, { name: Icons.USER }), ""],
-    },
-    {
-      tabView: m(InserisciArticoli, {
-        active: Store.activeTab === 1,
-        store: Store,
-      }),
-      label: [m(Icon, { name: Icons.DOLLAR_SIGN }), ""],
-    },
-    // { label: [m(Icon, { name: Icons.ARCHIVE }), m(``, '')] },
-    {
-      tabView: m(Impostazioni, { active: Store.activeTab === 2, store: Store }),
-      label: [m(Icon, { name: Icons.SETTINGS }), m(``, "")],
-    },
-  ];
+export const App = (v: Vnode<{}, { active: number, tabs: any[] }>) => {
   return {
-    async oninit(v) {
+    tabs: [],
+    async oninit() {
       const configContent = await window.fetchConfigFileContent();
       Store.localSettings = JSON.parse(configContent);
-      console.log({ store: Store });
+      console.log('init of App');
+
+      v.state.tabs = [
+        {
+          tabView: m(InserisciCliente, {
+            active: Store.activeTab === 0,
+            store: Store,
+          }),
+          label: [m(Icon, { name: Icons.USER }), ""],
+        },
+        {
+          tabView: m(InserisciArticoli, {
+            active: Store.activeTab === 1,
+            store: Store,
+          }),
+          label: [m(Icon, { name: Icons.DOLLAR_SIGN }), ""],
+        },
+        // { label: [m(Icon, { name: Icons.ARCHIVE }), m(``, '')] },
+        {
+          tabView: m(Impostazioni, { active: Store.activeTab === 2, store: Store }),
+          label: [m(Icon, { name: Icons.SETTINGS }), m(``, "")],
+        },
+      ];
+      m.redraw()
     },
-    view(v) {
+    view() {
       return m(
         ".app_root",
         {
@@ -118,7 +121,7 @@ export const App = (v: Vnode<{}, { active: number }>) => {
             size: "sm",
             class: tw`mb-4 grid grid-cols-3`,
           }, [
-            tabs.map((tab, i) => {
+            v.state.tabs.map((tab, i) => {
               return m(TabItem, {
                 key: i,
                 label: tab.label,
@@ -135,7 +138,7 @@ export const App = (v: Vnode<{}, { active: number }>) => {
             {
               class: tw`overflow-hidden`,
             },
-            tabs.map((tab, i) => {
+            v.state.tabs.map((tab, i) => {
               return tab.tabView;
             }),
           ),
