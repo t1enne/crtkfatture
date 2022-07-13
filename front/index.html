@@ -15,7 +15,8 @@
       window.writeConfigFile = writeConfigFile;
 
       (async () => {
-        window.localSettings = JSON.parse(await fetchConfigFileContent());
+        // window.localSettings = JSON.parse(await fetchConfigFileContent());
+        // console.log({ windowSettings: window.localSettings });
       })();
     </script>
     <script type="module" src="/src/index.ts" defer></script>

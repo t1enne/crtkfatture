@@ -46,65 +46,61 @@ export interface TabsProps {
   store: StoreInterface;
 }
 
+const inputFields: ClientInterface = {
+  header: "",
+  INDIRIZZO: "",
+  PIVA: "",
+  CODUNIVOCO: "",
+  PEC: "",
+  CF: "",
+  EMAIL: "",
+  CONTATTO: "",
+  TEL: "",
+  LISTINO: "",
+  TRASPORTA: "",
+  PAGAMENTO: "",
+  START: "",
+};
+
+const Store: StoreInterface = {
+  clients: [],
+  inputs: inputFields,
+  selectedClient: undefined,
+  newClient: undefined,
+  activeTab: 0,
+  iva: 1.22,
+  localSettings: window.localSettings,
+};
+
 export const App = (v: Vnode<{}, { active: number }>) => {
-  const inputFields: ClientInterface = {
-    header: "",
-    INDIRIZZO: "",
-    PIVA: "",
-    CODUNIVOCO: "",
-    PEC: "",
-    CF: "",
-    EMAIL: "",
-    CONTATTO: "",
-    TEL: "",
-    LISTINO: "",
-    TRASPORTA: "",
-    PAGAMENTO: "",
-    START: "",
-  };
-
-  // const Store: StoreInterface = {
-  //   clients: [],
-  //   inputs: inputFields,
-  //   selectedClient: undefined,
-  //   newClient: undefined,
-  //   activeTab: 0,
-  //   iva: 1.22,
-  //   localSettings: Window["LocalSettings"],
-  // };
-
-  const tabs = [
+  let tabs = [
     {
-      tabView: InserisciCliente,
+      tabView: m(InserisciCliente, {
+        active: Store.activeTab === 0,
+        store: Store,
+      }),
       label: [m(Icon, { name: Icons.USER }), ""],
     },
     {
-      tabView: InserisciArticoli,
+      tabView: m(InserisciArticoli, {
+        active: Store.activeTab === 1,
+        store: Store,
+      }),
       label: [m(Icon, { name: Icons.DOLLAR_SIGN }), ""],
     },
     // { label: [m(Icon, { name: Icons.ARCHIVE }), m(``, '')] },
     {
-      tabView: Impostazioni,
+      tabView: m(Impostazioni, { active: Store.activeTab === 2, store: Store }),
       label: [m(Icon, { name: Icons.SETTINGS }), m(``, "")],
     },
   ];
   return {
-    Store: {
-      clients: [],
-      inputs: inputFields,
-      selectedClient: undefined,
-      newClient: undefined,
-      activeTab: 0,
-      iva: 1.22,
-      localSettings: undefined,
-    },
-    async oncreate() {
+    async oninit(v) {
       const configContent = await window.fetchConfigFileContent();
-      this.Store.localSettings = JSON.parse(configContent);
-      window.localSettings = JSON.parse(configContent);
+      Store.localSettings = JSON.parse(configContent);
+      console.log({ store: Store });
     },
-    view() {
-      console.log(v);
+    view(v) {
       return m(
         ".app_root",
         {
@@ -127,9 +123,9 @@ export const App = (v: Vnode<{}, { active: number }>) => {
                 key: i,
                 label: tab.label,
                 class: tw`justify-center`,
-                active: this.Store.activeTab == i,
+                active: Store.activeTab == i,
                 onclick: () => {
-                  selTab(i, this.Store);
+                  selTab(i, Store);
                 },
               });
             }),
@@ -140,10 +136,7 @@ export const App = (v: Vnode<{}, { active: number }>) => {
               class: tw`overflow-hidden`,
             },
             tabs.map((tab, i) => {
-              return m(tab.tabView, {
-                active: this.Store.activeTab === i,
-                store: this.Store,
-              });
+              return tab.tabView;
             }),
           ),
           m(Toasts, {

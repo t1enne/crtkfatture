@@ -19,10 +19,15 @@ export const Impostazioni = (
   v: Vnode<TabsProps, { localSettings: Window["localSettings"] }>,
 ) => {
   return {
-    oncreate() {
-      v.state.localSettings = v.attrs.store.localSettings;
+    oninit(v) {
+      const { localSettings } = v.attrs.store;
+
+      if (!localSettings) {
+        console.error("couldn't load local settings in impostazioni");
+      }
+      v.state.localSettings = localSettings;
     },
-    view() {
+    view(v) {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
@@ -62,7 +67,7 @@ export const Impostazioni = (
             {
               class: tw`flex flex-wrap pb-4`,
             },
-            v.state.localSettings?.venditori
+            v.state.localSettings.venditori
               .map((venditore) =>
                 m(Tag, {
                   label: venditore,

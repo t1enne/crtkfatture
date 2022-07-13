@@ -298,11 +298,14 @@ export const InserisciCliente = (
   ];
 
   return {
-    oninit() {
-      v.state.localSettings = v.attrs.store.localSettings ||
-        window.localSettings;
+    oncreate() {
+      v.state.localSettings = v.attrs.store.localSettings != undefined
+        ? v.attrs.store.localSettings
+        : window.localSettings;
 
-      console.log(v.state.localSettings);
+      if (!v.state.localSettings) {
+        console.error("couldn't load local settings in cliente");
+      }
     },
     view() {
       return m(

@@ -7,8 +7,9 @@ export default defineConfig({
   //   jsxFactory: "m",
   //   jsxFragment: "'['",
   // },
-  base: process.env.IS_DEV !== 'true' ? './' : '/',
+  base: process.env.IS_DEV !== "true" ? "./" : "/",
   build: {
-    outDir: '../dist',
+    minify: false,
+    outDir: "../dist",
   },
 });

@@ -111,6 +111,7 @@ const InserisciArticoli = (
 
   const writeOrderText = (store: StoreInterface, items: LineItem[]) => {
     const { localSettings } = store;
+
     const lineItemsTexts = items.map((l) => {
       let { qty, art, price } = l;
       if (qty() < 10 && qty().toString().length < 2) {
@@ -134,15 +135,13 @@ const InserisciArticoli = (
         .join("\n"),
       `STATUS   PRONTO ${getTotals(1).pieces} COLLI`,
       `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${
-        localSettings
-          ?.shop || ""
+        localSettings?.shop || ""
       } € ${
         (parseFloat(getTotals(1.22).price) *
           v.attrs.store.iva).toFixed(2)
       } ${note()}`,
       `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${
-        localSettings
-          ?.shop || ""
+        localSettings?.shop || ""
       }`,
     ].join("\n");
 
@@ -163,15 +162,17 @@ const InserisciArticoli = (
   };
 
   return {
-    oncreate() {
+    localSettings: {},
+    async oncreate(v) {
       addLineItem();
-      v.state.localSettings = v.attrs.store.localSettings;
+      const { localSettings } = v.attrs.store;
+      v.state.localSettings = localSettings;
 
       if (!v.state.localSettings) {
-        throw ("couldn't load local settings in articoli");
+        console.error("couldn't load local settings in articoli");
       }
     },
-    view() {
+    view(v) {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [

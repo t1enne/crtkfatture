@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="./assets/favicon.7a6f6d17.ico" />
     <title>CortekStore Fatture</title>
-    <script type="module" crossorigin src="./assets/index.3f4f332c.js"></script>
-    <link rel="stylesheet" href="./assets/index.765894af.css">
+    <script type="module" crossorigin src="./assets/index.8c1f1eff.js"></script>
+    <link rel="stylesheet" href="./assets/index.3505e917.css">
   </head>
 
   <body onload="start()">
@@ -17,7 +17,8 @@
       window.writeConfigFile = writeConfigFile;
 
       (async () => {
-        // settings = JSON.parse(await fetchConfigFileContent());
+        window.localSettings = JSON.parse(await fetchConfigFileContent());
+        console.log({ windowSettings: window.localSettings });
       })();
     </script>
     
