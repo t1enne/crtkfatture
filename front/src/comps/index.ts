@@ -9,6 +9,7 @@ declare global {
 interface LocalSettings {
   shop: string;
   shops: string[];
+  venditore: string;
   venditori: string[];
 }
 

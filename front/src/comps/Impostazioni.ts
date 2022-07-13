@@ -14,25 +14,26 @@ import {
 } from "construct-ui";
 import { TabsProps } from "../App";
 
+
 export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
   const { localSettings } = window;
+  
 
   return {
-    oninit(v) {
+    oninit() {
       this.state = localSettings;
     },
-    view(v) {
+    view() {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
         m("h1", { class: tw`text-xl font-bold mb-4` }, "Impostazioni"),
         m(Form, {
           // gutter: 15,
-          onsubmit(e) {
+          onsubmit(e: any) {
             e.preventDefault();
-            const { target } = e;
+            const { target }  = e;
             const inputs = target.elements;
-            const values = <Record<keyof Window["localSettings"], string>> {};
             window.localSettings.venditori.push(inputs[0].value);
           },
         }, [
@@ -60,7 +61,7 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
           m(
             "div.seller-tags",
             {
-              class: tw`flex flex-wrap py-4`,
+              class: tw`flex flex-wrap pb-4`,
             },
             localSettings?.venditori
               .map((venditore) =>
@@ -76,7 +77,7 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
           Form,
           {
             gutter: 15,
-            onsubmit(e) {
+            onsubmit(e: SubmitEvent) {
               e.preventDefault();
               const target = e.target as HTMLFormElement;
               const inputs = Array.from(target.elements);
@@ -98,16 +99,6 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
                 md: 12,
               },
             },
-            // [
-            //   m(FormLabel, { for: 'dataPath' }, 'Percorso Data'),
-            //   m(Input, {
-            //     contentLeft: m(Icon, { name: Icons.PACKAGE }),
-            //     id: 'dataPath',
-            //     name: 'dataPath',
-            //     placeholder: 'ES: C:/Users/utente/Desktop/Data',
-            //     value: localStorage.dataPath,
-            //   })
-            // ],
             [
               m(FormLabel, { for: "shop" }, "Negozio"),
               m(

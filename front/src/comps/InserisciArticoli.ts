@@ -6,7 +6,6 @@ import {
   Card,
   ControlGroup,
   Form,
-  FormLabel,
   Icon,
   Icons,
   Input,
@@ -149,7 +148,8 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
         (parseFloat(getTotals(1.22).price) *
           v.attrs.store.iva).toFixed(2)
       } ${note()}`,
-      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings.shop}`,
+      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings.shop}\n`,
+      window.localSettings.venditore,
     ].join("\n");
 
     return text;
@@ -279,7 +279,7 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
               },
             }),
           ),
-          m("h1", { class: tw`font-bold text-sm ml-2 mt-6` }, "Venditori"),
+          m("h1", { class: tw`font-bold text-sm ml-2 mt-6` }, "Venditore"),
           m(
             ControlGroup,
             { class: tw`w-full ` },
@@ -287,8 +287,9 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
               options: window.localSettings.venditori,
               defaultValue: "",
               required: true,
-              value: "",
-              onchange: (e: InputEvent) => {
+              value: window.localSettings.venditore,
+              onchange: (e: any) => {
+                window.localSettings.venditore = e.target.value 
               },
             }),
           ),
@@ -398,7 +399,7 @@ const LineItem = (v: Vnode<LineItem, {}>) => {
         },
         m(Input, {
           type: "number",
-          min: "0",
+          min: "1",
           required: true,
           placeholder: "qty",
           oninput(e: InputEvent) {
