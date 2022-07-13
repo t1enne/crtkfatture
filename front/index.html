@@ -11,12 +11,11 @@
     <div id="app"></div>
     <script>
       let settings;
-      window.getConfig = () => settings;
+      window.fetchConfigFileContent = fetchConfigFileContent;
       window.writeConfigFile = writeConfigFile;
 
       (async () => {
-        settings = JSON.parse(await fetchConfigFileContent());
-        window.localSettings = settings;
+        window.localSettings = JSON.parse(await fetchConfigFileContent());
       })();
     </script>
     <script type="module" src="/src/index.ts" defer></script>

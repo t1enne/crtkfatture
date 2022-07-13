@@ -39,9 +39,9 @@ export const PIvaInput = () => {
                 onclick(e: any) {
                   // v.attrs.inputs = v.attrs.clients[i]
                   for (const ind in v.attrs.clients[i]) {
-                    const f = v.attrs.clients[i][ind](
-                      cl(`.input-${f} input`) as HTMLInputElement,
-                    ).value! = "hey";
+                    const f = v.attrs.clients[i][ind];
+                    (cl(`.input-${f} input`) as HTMLInputElement).value! =
+                      "hey";
                   }
                   // v.attrs.inputStream(v.attrs.clients[i])
                 },

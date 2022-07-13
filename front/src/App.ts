@@ -63,15 +63,15 @@ export const App = (v: Vnode<{}, { active: number }>) => {
     START: "",
   };
 
-  const Store: StoreInterface = {
-    clients: [],
-    inputs: inputFields,
-    selectedClient: undefined,
-    newClient: undefined,
-    activeTab: 0,
-    iva: 1.22,
-    localSettings: Window["LocalSettings"],
-  };
+  // const Store: StoreInterface = {
+  //   clients: [],
+  //   inputs: inputFields,
+  //   selectedClient: undefined,
+  //   newClient: undefined,
+  //   activeTab: 0,
+  //   iva: 1.22,
+  //   localSettings: Window["LocalSettings"],
+  // };
 
   const tabs = [
     {
@@ -89,10 +89,22 @@ export const App = (v: Vnode<{}, { active: number }>) => {
     },
   ];
   return {
-    async oninit() {
-      Store.localSettings = await window.getConfig();
+    Store: {
+      clients: [],
+      inputs: inputFields,
+      selectedClient: undefined,
+      newClient: undefined,
+      activeTab: 0,
+      iva: 1.22,
+      localSettings: undefined,
+    },
+    async oncreate() {
+      const configContent = await window.fetchConfigFileContent();
+      this.Store.localSettings = JSON.parse(configContent);
+      window.localSettings = JSON.parse(configContent);
     },
     view() {
+      console.log(v);
       return m(
         ".app_root",
         {
@@ -115,9 +127,9 @@ export const App = (v: Vnode<{}, { active: number }>) => {
                 key: i,
                 label: tab.label,
                 class: tw`justify-center`,
-                active: Store.activeTab == i,
+                active: this.Store.activeTab == i,
                 onclick: () => {
-                  selTab(i, Store);
+                  selTab(i, this.Store);
                 },
               });
             }),
@@ -129,8 +141,8 @@ export const App = (v: Vnode<{}, { active: number }>) => {
             },
             tabs.map((tab, i) => {
               return m(tab.tabView, {
-                active: Store.activeTab === i,
-                store: Store,
+                active: this.Store.activeTab === i,
+                store: this.Store,
               });
             }),
           ),

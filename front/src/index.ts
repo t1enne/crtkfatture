@@ -4,7 +4,7 @@ import { App } from "./App";
 declare global {
   interface Window {
     localSettings: LocalSettings;
-    getConfig(): LocalSettings;
+    fetchConfigFileContent(): Promise<string>;
     writeConfigFile(fileContent: string): Promise<boolean>;
   }
 }

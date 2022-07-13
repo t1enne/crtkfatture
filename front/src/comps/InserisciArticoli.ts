@@ -81,25 +81,9 @@ const parseNewClient = (client: ClientInterface) => {
   return arr.join("\n");
 };
 
-// function getNewClientNum(clients: ClientInterface[], client: ClientInterface) {
-//   if (clients) {
-//     const len = clients.length;
-//     const lastHead = clients[len - 1]?.header;
-//     const lastWithIva = parseInt(
-//       lastHead?.match(/\*[0-9]*/)[0].replace("*", ""),
-//     );
-//     const lastWithoutIva = 20000 + len - lastWithIva;
-//     if (client.TIPO && client.TIPO === "TESTER") {
-//       return lastWithoutIva + 1;
-//     } else {
-//       return lastWithIva + 1;
-//     }
-//   } else {
-//     return 0;
-//   }
-// }
-
-const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
+const InserisciArticoli = (
+  v: Vnode<TabsProps, { localSettings: Window["localSettings"] }>,
+) => {
   let note = stream<string>(""),
     scontrino = stream<number>(0),
     lineItems: LineItem[] = [];
@@ -126,7 +110,7 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
   };
 
   const writeOrderText = (store: StoreInterface, items: LineItem[]) => {
-    const { localSettings } = window;
+    const { localSettings } = store;
     const lineItemsTexts = items.map((l) => {
       let { qty, art, price } = l;
       if (qty() < 10 && qty().toString().length < 2) {
@@ -149,11 +133,17 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
         .map((l) => l.join("\t"))
         .join("\n"),
       `STATUS   PRONTO ${getTotals(1).pieces} COLLI`,
-      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings.shop} € ${
+      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${
+        localSettings
+          ?.shop || ""
+      } € ${
         (parseFloat(getTotals(1.22).price) *
           v.attrs.store.iva).toFixed(2)
       } ${note()}`,
-      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${localSettings.shop}`,
+      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${
+        localSettings
+          ?.shop || ""
+      }`,
     ].join("\n");
 
     return text;
@@ -173,7 +163,14 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
   };
 
   return {
-    oncreate: addLineItem,
+    oncreate() {
+      addLineItem();
+      v.state.localSettings = v.attrs.store.localSettings;
+
+      if (!v.state.localSettings) {
+        throw ("couldn't load local settings in articoli");
+      }
+    },
     view() {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
@@ -256,7 +253,7 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
               required: true,
               fluid: true,
               value: note(),
-              oninput(e) {
+              oninput(e: any) {
                 note(e.target.value.toUpperCase());
               },
             }),
@@ -290,12 +287,14 @@ const InserisciArticoli = (v: Vnode<TabsProps, {}>) => {
             ControlGroup,
             { class: tw`w-full ` },
             m(Select, {
-              options: window.localSettings.venditori,
+              options: v.state.localSettings?.venditori,
               defaultValue: "",
               required: true,
-              value: window.localSettings.venditore,
+              value: v.state.localSettings?.venditore,
               onchange: (e: any) => {
-                window.localSettings.venditore = e.target.value;
+                if (v.state.localSettings) {
+                  v.state.localSettings.venditore = e.target.value;
+                }
               },
             }),
           ),

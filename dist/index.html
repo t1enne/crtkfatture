@@ -3,32 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.7a6f6d17.ico" />
     <title>CortekStore Fatture</title>
-    <script type="module" crossorigin src="./assets/index.7a1092fb.js"></script>
-    <link rel="stylesheet" href="./assets/index.8ea41f86.css">
+    <script type="module" crossorigin src="./assets/index.3f4f332c.js"></script>
+    <link rel="stylesheet" href="./assets/index.765894af.css">
   </head>
 
   <body onload="start()">
     <div id="app"></div>
-    
     <script>
+      let settings;
+      window.fetchConfigFileContent = fetchConfigFileContent;
+      window.writeConfigFile = writeConfigFile;
+
       (async () => {
-        const config = JSON.parse(await printConfig());
-        console.log(config);
-
-        for (const field in config) {
-          console.log(field);
-          localStorage[field] = config[field];
-        }
+        // settings = JSON.parse(await fetchConfigFileContent());
       })();
-
-      function updateConfigFile() {
-        return JSON.parse(localStorage);
-      }
-
-      setTimeout(async () => {
-        await printConfig();
-      }, 5000);
     </script>
+    
   </body>
 </html>

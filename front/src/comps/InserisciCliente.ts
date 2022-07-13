@@ -50,126 +50,6 @@ export type InputConfType = Record<ClientFormField, InputType>;
 
 // change html element's required attribute
 
-const clientUserInput: InputConfType = {
-  "Denominazione": {
-    info: "Mario Rossi O MIRAUTO SRL",
-    props: {
-      pattern: ".*[^\\.]*",
-      // pattern: ".*[^\\.]*#\\s+\\w+",
-      required: true,
-    },
-    span: 12,
-  },
-  "P_IVA": {
-    info: "Codice a 11 numeri o vuoto nel caso di privati",
-    props: {
-      type: "tel",
-      maxlength: 11,
-      pattern: "[0-9]{11}",
-      required: true,
-    },
-    span: 12,
-  },
-  "Cod_Fiscale": {
-    info:
-      "Per le società è spesso uguale a PIVA. Negli altri casi CF alfanumerico",
-    props: {
-      required: true,
-      minlength: 11,
-      maxlength: 16,
-      pattern: `([A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]|\\d{11})`,
-    },
-    span: 12,
-  },
-  "Indirizzo": {
-    info: "VIA G.ALBINI, 19",
-    props: {
-      required: true,
-      pattern: ".*",
-      // pattern: ".*#\\s+[0-9]{5}\\s+#.*#\\s+\\w{2}\\s+#.*",
-    },
-    span: 6,
-  },
-  "CAP": {
-    info: "06123",
-    props: {
-      required: true,
-      minlength: 5,
-      maxlength: 5,
-      pattern: "[0-9]{5}",
-    },
-    span: 4,
-  },
-  "Città": {
-    info: "PERUGIA",
-    props: {
-      required: true,
-      pattern: "\\w+",
-    },
-    span: 6,
-  },
-  "Provincia": {
-    info: "PG",
-    props: {
-      required: true,
-      minlength: 2,
-      maxlength: 2,
-      pattern: "\\w{2}",
-    },
-    span: 3,
-  },
-  "Regione": {
-    info: "UMBRIA",
-    props: {
-      required: true,
-    },
-    options: window.localSettings.regioni,
-    default: "",
-    span: 3,
-  },
-  "Cod_Univoco": {
-    info: "Codice a 7 car alfanumerici o ESENTE",
-    props: {
-      required: true,
-      type: "text",
-      maxlength: 7,
-      minlength: 6,
-      pattern: "(\\w{7}|esente|Esente|ESENTE)",
-    },
-    span: 6,
-  },
-  "PEC": {
-    info: "Per la fattura elettronica serve o il CODUNIVOCO o la PEC",
-    props: {
-      required: true,
-      type: "text",
-      pattern: ".*@.*\\.\\w*",
-    },
-  },
-  "Email": {
-    info: "Mail del richiedente fatture",
-    props: {
-      pattern: ".*@.*\\.\\w*",
-    },
-  },
-  "Contatto": {
-    info: "Nome e Cognome del richiedente fattura. Oppure ...",
-    props: {
-      required: true,
-      minlength: 3,
-      pattern: "..*",
-    },
-  },
-  "Telefono": {
-    info: "Tel del richiedente fattura",
-    props: {
-      type: "tel",
-      required: true,
-      pattern: "..*",
-    },
-  },
-};
-
 const handleClientGroupChange = (
   e: InputEvent,
   store: StoreInterface,
@@ -238,9 +118,155 @@ const handleClientGroupChange = (
   }
 };
 
-export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
+export const InserisciCliente = (
+  v: Vnode<
+    TabsProps,
+    { selectedRegion: string; localSettings: Window["localSettings"] }
+  >,
+) => {
   // let ivaFour = false;
   const clientGroup: Stream<string> = stream("");
+
+  const clientUserInput: InputConfType = {
+    "Denominazione": {
+      info: "Mario Rossi O MIRAUTO SRL",
+      props: {
+        pattern: ".*[^\\.]*",
+        // pattern: ".*[^\\.]*#\\s+\\w+",
+        required: true,
+      },
+      span: 12,
+    },
+    "P_IVA": {
+      info: "Codice a 11 numeri o vuoto nel caso di privati",
+      props: {
+        type: "tel",
+        maxlength: 11,
+        pattern: "[0-9]{11}",
+        required: true,
+      },
+      span: 12,
+    },
+    "Cod_Fiscale": {
+      info:
+        "Per le società è spesso uguale a PIVA. Negli altri casi CF alfanumerico",
+      props: {
+        required: true,
+        minlength: 11,
+        maxlength: 16,
+        pattern: `([A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]|\\d{11})`,
+      },
+      span: 12,
+    },
+    "Indirizzo": {
+      info: "VIA G.ALBINI, 19",
+      props: {
+        required: true,
+        pattern: ".*",
+        // pattern: ".*#\\s+[0-9]{5}\\s+#.*#\\s+\\w{2}\\s+#.*",
+      },
+      span: 6,
+    },
+    "CAP": {
+      info: "06123",
+      props: {
+        required: true,
+        minlength: 5,
+        maxlength: 5,
+        pattern: "[0-9]{5}",
+      },
+      span: 4,
+    },
+    "Città": {
+      info: "PERUGIA",
+      props: {
+        required: true,
+        pattern: "\\w+",
+      },
+      span: 6,
+    },
+    "Provincia": {
+      info: "PG",
+      props: {
+        required: true,
+        minlength: 2,
+        maxlength: 2,
+        pattern: "\\w{2}",
+      },
+      span: 3,
+    },
+    "Regione": {
+      info: "UMBRIA",
+      props: {
+        required: true,
+      },
+      options: [
+        "PUGLIA",
+        "BASILICATA",
+        "ABRUZZO",
+        "CALABRIA",
+        "CAMPANIA",
+        "EMILIA",
+        "FRIULI",
+        "LAZIO",
+        "LIGURIA",
+        "LOMBARDIA",
+        "MARCHE",
+        "MOLISE",
+        "PIEMONTE",
+        "SARDEGNA",
+        "SICILIA",
+        "TOSCANA",
+        "TRENTINO",
+        "UMBRIA",
+        "VAL_D'AOSTA",
+        "VENETO",
+      ],
+      default: "",
+      span: 3,
+    },
+    "Cod_Univoco": {
+      info: "Codice a 7 car alfanumerici o ESENTE",
+      props: {
+        required: true,
+        type: "text",
+        maxlength: 7,
+        minlength: 6,
+        pattern: "(\\w{7}|esente|Esente|ESENTE)",
+      },
+      span: 6,
+    },
+    "PEC": {
+      info: "Per la fattura elettronica serve o il CODUNIVOCO o la PEC",
+      props: {
+        required: true,
+        type: "text",
+        pattern: ".*@.*\\.\\w*",
+      },
+    },
+    "Email": {
+      info: "Mail del richiedente fatture",
+      props: {
+        pattern: ".*@.*\\.\\w*",
+      },
+    },
+    "Contatto": {
+      info: "Nome e Cognome del richiedente fattura. Oppure ...",
+      props: {
+        required: true,
+        minlength: 3,
+        pattern: "..*",
+      },
+    },
+    "Telefono": {
+      info: "Tel del richiedente fattura",
+      props: {
+        type: "tel",
+        required: true,
+        pattern: "..*",
+      },
+    },
+  };
 
   const formGroups: {
     title: string;
@@ -272,6 +298,12 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
   ];
 
   return {
+    oninit() {
+      v.state.localSettings = v.attrs.store.localSettings ||
+        window.localSettings;
+
+      console.log(v.state.localSettings);
+    },
     view() {
       return m(
         `.tab`,
@@ -320,16 +352,6 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
                   if (iva === 1.04) v.attrs.store.iva = 1.22;
                   else iva = v.attrs.store.iva = 1.04;
                   console.log(iva);
-                  // ivaFour = !ivaFour;
-                  // ivaFour
-                  //   ? (v.attrs.store.iva = 1.04)
-                  //   : (v.attrs.store.iva = 1.22);
-
-                  // if (ivaFour) {
-                  //   v.attrs.store.inputs.TIPO = "TESTER";
-                  // } else {
-                  //   v.attrs.store.inputs.TIPO = undefined;
-                  // }
                 },
               }),
             ),
@@ -387,7 +409,7 @@ export const InserisciCliente = (v: Vnode<TabsProps, {}>) => {
                 type: "submit",
                 label: "Conferma",
                 intent: "positive",
-                value: v.attrs.store.inputs,
+                // value: v.attrs.store.inputs,
               }),
             ),
           ),

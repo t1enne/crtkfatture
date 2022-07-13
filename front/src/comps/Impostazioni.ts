@@ -15,12 +15,12 @@ import {
 import { TabsProps } from "../App";
 import { AppToaster } from "./AppToaster";
 
-export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
-  const { localSettings } = window;
-
+export const Impostazioni = (
+  v: Vnode<TabsProps, { localSettings: Window["localSettings"] }>,
+) => {
   return {
-    oninit() {
-      this.state = localSettings;
+    oncreate() {
+      v.state.localSettings = v.attrs.store.localSettings;
     },
     view() {
       return m(".tab", {
@@ -33,7 +33,7 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
             e.preventDefault();
             const { target } = e;
             const inputs = target.elements;
-            window.localSettings.venditori.push(inputs[0].value);
+            v.state.localSettings.venditori.push(inputs[0].value);
           },
         }, [
           m(
@@ -62,7 +62,7 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
             {
               class: tw`flex flex-wrap pb-4`,
             },
-            localSettings?.venditori
+            v.state.localSettings?.venditori
               .map((venditore) =>
                 m(Tag, {
                   label: venditore,
@@ -82,10 +82,10 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
               const inputs = Array.from(target.elements);
               inputs.forEach((input: HTMLInputElement) => {
                 const { name, value } = input;
-                window.localSettings[name] = value;
+                v.state.localSettings[name] = value;
               });
               const saved = await window.writeConfigFile(
-                JSON.stringify(window.localSettings, null, 2),
+                JSON.stringify(v.state.localSettings, null, 2),
               );
               if (saved) {
                 AppToaster.notify({
@@ -118,8 +118,8 @@ export const Impostazioni = (v: Vnode<TabsProps, {}>) => {
                 m(Select, {
                   class: tw`block w-48`,
                   name: "shop",
-                  options: this.state.shops,
-                  value: this.state.shop,
+                  options: v.state.localSettings?.shops || [],
+                  value: v.state.localSettings?.shop || "",
                 }),
               ),
             ],
