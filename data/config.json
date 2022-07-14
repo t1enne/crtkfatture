@@ -1,5 +1,5 @@
 {
-  "shop": "ORIOCENTER",
+  "shop": "FIUMARA",
   "shops": [
     "ROMAEST",
     "FIUMARA",
@@ -10,7 +10,9 @@
     "CITTAFIERA"
   ],
   "venditore": "",
-  "venditori": [],
+  "venditori": [
+    "Naz"
+  ],
   "to": "incassi@cortekstore.com",
   "": ""
 }

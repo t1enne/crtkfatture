@@ -99,12 +99,14 @@ func sendMail(config Config, subject string, mailBody string) bool {
 	// get shops address from name
 	shopSplit := strings.ReplaceAll(config.Shop, " ", "")
 	shopJoined := strings.ToLower(shopSplit)
+	log.Println(shopJoined + "@cortekstore.com")
 
 	// New email simple html with inline and CC
 	email := mail.NewMSG()
+
 	email.SetFrom("incassi@cortekstore.com").
 		AddTo(config.To).
-		AddBcc(shopJoined + "@cortekstore.com").
+		AddCc(shopJoined + "@cortekstore.com").
 		SetSubject(subject)
 
 	email.SetBody(mail.TextPlain, mailBody)
