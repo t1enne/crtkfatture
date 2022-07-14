@@ -4,6 +4,7 @@ import Stream from "mithril/stream";
 import { tw } from "twind";
 import {
   Button,
+  Dialog,
   Form,
   FormGroup,
   FormLabel,
@@ -124,8 +125,11 @@ export const InserisciCliente = (
     { selectedRegion: string }
   >,
 ) => {
-  let { localSettings } = v.attrs.store;
+  let { localSettings } = v.attrs.store,
+    isDialogOpen = false;
   const clientGroup: Stream<string> = stream("");
+  let onConfirm,
+    submitEvent;
 
   const clientUserInput: InputConfType = {
     "Denominazione": {
@@ -306,7 +310,7 @@ export const InserisciCliente = (
       return m(
         `.tab`,
         {
-          class: v.attrs.active ? "active" : "",
+          class: v.attrs.active && "active",
         },
         [
           m("h1", { class: tw`text-xl font-bold mb-4` }, "Inserisci Cliente"),
@@ -327,11 +331,35 @@ export const InserisciCliente = (
             }
             `,
           ),
+          m(Dialog, {
+            isOpen: isDialogOpen,
+            hasCloseButton: false,
+            title: "Conferma",
+            content: "Vuoi confermare e salvare i dati del cliente?",
+            footer: m("", [
+              m(Button, {
+                label: "Chiudi",
+                onclick: () => isDialogOpen = false,
+              }),
+              m(Button, {
+                label: "Conferma",
+                intent: "primary",
+                onclick: async () => {
+                  isDialogOpen = false;
+                  await handleSubmit(submitEvent, v);
+                },
+              }),
+            ]),
+          }),
           m(
             Form,
             {
               class: tw("px-6"),
-              onsubmit: (e: SubmitEvent) => handleSubmit(e, v),
+              onsubmit: async (e: SubmitEvent) => {
+                e.preventDefault();
+                submitEvent = e;
+                isDialogOpen = true;
+              },
             },
             m(
               FormGroup,
@@ -495,8 +523,6 @@ const handleSubmit = async (
   e: SubmitEvent,
   v: Vnode<TabsProps, {}>,
 ) => {
-  e.preventDefault();
-
   const target = e.target as HTMLFormElement;
   const inputs = target.elements;
   const values = <Record<ClientFormField, string>> {};
@@ -510,6 +536,7 @@ const handleSubmit = async (
     values["Città"]
   } # ${values["Provincia"]} # ${values["Regione"]}`;
 
+  v.attrs.store.newClient = true;
   v.attrs.store.selectedClient = {
     header: `${values["Denominazione"]} # ${values["Regione"]}`,
     INDIRIZZO: addressString,
@@ -527,8 +554,17 @@ const handleSubmit = async (
   };
 
   const written = await window.writeToClientsFile(v.attrs.store.selectedClient);
+  if (written) {
+    AppToaster.notify({
+      intent: "positive",
+      msg: "Cliente salvato!",
+    });
+  } else {
+    AppToaster.notify({
+      intent: "negative",
+      msg: "Non sono riuscito a scrivere sul file dei clienti",
+    });
+  }
 
-  console.log({ written });
-
-  selTab(1, v.attrs.store);
+  selTab(2, v.attrs.store);
 };

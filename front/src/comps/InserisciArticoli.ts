@@ -65,6 +65,8 @@ const euroTag = m("tag", {
 }, "€");
 
 const parseClient = (client: ClientInterface, isNew: boolean) => {
+  console.log(isNew);
+
   if (!client) return [];
   console.log(client);
   const arr = [];
@@ -312,7 +314,7 @@ const InserisciArticoli = (
               fluid: true,
               value: note(),
               oninput(e: any) {
-                note(e.target.value.toUpperCase());
+                note(e.target.value);
               },
             }),
           ),

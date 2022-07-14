@@ -10,9 +10,6 @@
     "CITTAFIERA"
   ],
   "venditore": "",
-  "venditori": [
-    "Naz"
-  ],
-  "to": "incassi@cortekstore.com",
-  "": ""
+  "venditori": [],
+  "to": "incassi@cortekstore.com"
 }
