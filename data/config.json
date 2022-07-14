@@ -1,5 +1,5 @@
 {
-  "shop": "CASAMASSIMA",
+  "shop": "ORIOCENTER",
   "shops": [
     "ROMAEST",
     "FIUMARA",
@@ -9,7 +9,7 @@
     "PORTE DI CATANIA",
     "CITTAFIERA"
   ],
-  "venditore": "Nazir",
+  "venditore": "",
   "venditori": [],
   "to": "incassi@cortekstore.com",
   "": ""

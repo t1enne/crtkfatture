@@ -71,7 +71,13 @@ const parseClient = (client: ClientInterface, isNew: boolean) => {
   const newHeader = `* ${client.header}`;
   arr.push(newHeader);
 
-  if (!isNew) return arr.join("\n");
+  // if repeating client, print just payment option and header
+  if (!isNew) {
+    const paym = "PAGAMENTO";
+    arr.push(`${paym}${addSpaces(paym)}${client[paym]}`);
+
+    return arr.join("\n");
+  }
 
   for (const key in client) {
     let value = client[key];
