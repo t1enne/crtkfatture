@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"embed"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -176,6 +177,8 @@ func main() {
 	if runtime.GOOS == "linux" {
 		args = append(args, "--class=Lorca")
 	}
+	pwd := flag.String("pwd", "", "Email login Password")
+	flag.Parse()
 
 	ui, err := lorca.New("", "", 1024, 980, args...)
 
@@ -192,6 +195,15 @@ func main() {
 
 	config := parseConfig(configFileContent)
 	log.Println(config)
+
+	isDev := true
+
+	if *pwd != "" {
+		config.Pwd = *pwd
+		isDev = false
+	}
+
+	log.Printf("Running in DEV: %t", isDev)
 	// A simple way to know when UI is ready (uses body.onload event in JS)
 	ui.Bind("start", func() {
 		log.Println("UI is ready")
@@ -250,8 +262,12 @@ func main() {
 	}
 	defer ln.Close()
 	go http.Serve(ln, http.FileServer(http.FS(fs)))
-	// ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
-	ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
+
+	if isDev {
+		ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
+	} else {
+		ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
+	}
 
 	// Wait until the interrupt signal arrives or browser window is closed
 	sigc := make(chan os.Signal)
@@ -260,7 +276,6 @@ func main() {
 	case <-sigc:
 	case <-ui.Done():
 	}
-
 }
 
 func check(e error) {
