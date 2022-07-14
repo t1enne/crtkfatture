@@ -5,7 +5,9 @@ import {
   Button,
   Card,
   ControlGroup,
+  Dialog,
   Form,
+  FormLabel,
   Icon,
   Icons,
   Input,
@@ -13,9 +15,9 @@ import {
   Select,
   TextArea,
 } from "construct-ui";
-import { cl } from "../utils.js";
+import { cl, getItalianMonth } from "../utils.js";
 import { ClientInterface, StoreInterface, TabsProps } from "../App";
-import { createEvent } from "./CercaCliente.js";
+import { AppToaster } from "./AppToaster.js";
 
 type LineItem = {
   qty<T>(n?: string | number): T;
@@ -23,8 +25,9 @@ type LineItem = {
   price(n?: number): number;
   total(n?: number): number;
 };
-export const getDate = (f?: string) => {
-  const now = new Date();
+
+export const getDate = (f?: string, ms?: Date) => {
+  const now = new Date(ms);
   let dd = now.getDate().toString();
   let mm = (now.getMonth() + 1).toString();
   const year = now.getFullYear();
@@ -61,13 +64,14 @@ const euroTag = m("tag", {
   },
 }, "€");
 
-const parseNewClient = (client: ClientInterface) => {
+const parseClient = (client: ClientInterface, isNew: boolean) => {
   if (!client) return [];
   console.log(client);
   const arr = [];
   const newHeader = `* ${client.header}`;
-
   arr.push(newHeader);
+
+  if (!isNew) return arr.join("\n");
 
   for (const key in client) {
     let value = client[key];
@@ -80,13 +84,41 @@ const parseNewClient = (client: ClientInterface) => {
   return arr.join("\n");
 };
 
+const onConfirm = async (
+  localSettings: Window["localSettings"],
+  date: Date,
+) => {
+  const orderText = (cl("textarea") as HTMLTextAreaElement).value;
+  // navigator.clipboard.writeText(orderText);
+  const trimmedShopName = localSettings.shop.split(" ").join("");
+  const monthName = getItalianMonth(date?.getMonth());
+  console.log(orderText);
+  const sent = await window.sendMail(
+    `fatture_${trimmedShopName}_${monthName}_${date.getFullYear()}`,
+    orderText,
+  );
+  if (sent) {
+    AppToaster.notify({
+      intent: "positive",
+      msg: "Mail spedita",
+    });
+  } else {
+    AppToaster.notify({
+      intent: "negative",
+      msg: "C'è stato un problema, contatta Nazir",
+    });
+  }
+};
+
 const InserisciArticoli = (
   v: Vnode<TabsProps, {}>,
 ) => {
   let note = stream<string>(""),
-    scontrino = stream<number>(0),
+    scontrino = stream(0),
     lineItems: LineItem[] = [],
-    localSettings: Window["localSettings"]
+    dateMs = stream<Date>(),
+    isDialogOpen = false,
+    localSettings: Window["localSettings"];
 
   const addLineItem = () => {
     let qty = stream(0),
@@ -96,7 +128,7 @@ const InserisciArticoli = (
         return qty() * price();
       });
     lineItems.push({ qty, art, price, total });
-    m.redraw()
+    m.redraw();
   };
 
   const getTotals = (tax?: number) => {
@@ -119,7 +151,7 @@ const InserisciArticoli = (
       return [
         qty(),
         art(),
-        `(${getDate("dd/mm")})`,
+        `(${getDate("dd/mm", dateMs())})`,
         "PR",
         (price() / 1.22).toFixed(2),
         "Ax (D=0)",
@@ -127,18 +159,23 @@ const InserisciArticoli = (
     });
 
     const text = [
-      parseNewClient(store.newClient),
-      "\n\n",
+      parseClient(store.selectedClient, store.newClient),
+      "\n",
       lineItemsTexts
         .map((l) => l.join("\t"))
         .join("\n"),
       `STATUS   PRONTO ${getTotals(1).pieces} COLLI`,
-      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${getDate()}${store.localSettings?.shop
-      } € ${(parseFloat(getTotals(1.22).price) *
-        v.attrs.store.iva).toFixed(2)
+      `NOTAFT   RELATIVA SCONTRINO ${scontrino()} DEL ${
+        getDate("dd/mm/yyyy", dateMs())
+      }${store
+        .localSettings?.shop} € ${
+        (parseFloat(getTotals(1.22).price) *
+          v.attrs.store.iva).toFixed(2)
       } ${note()}`,
-      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${getDate()}${store.localSettings?.shop
-      }`,
+      `CAUSALE  RIF SCONTRINO ${scontrino()} DEL ${
+        getDate("dd/mm/yyyy", dateMs())
+      }${store
+        .localSettings?.shop}\n`,
       store.localSettings?.venditore,
     ].join("\n");
 
@@ -158,20 +195,18 @@ const InserisciArticoli = (
     },
   };
 
-
-
   return {
     oninit() {
       addLineItem();
     },
     onupdate() {
-      localSettings = v.attrs.store.localSettings
+      localSettings = v.attrs.store.localSettings;
     },
     view() {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
-        m("h1", { class: tw`text-xl font-bold mb-4` }, localSettings?.shop),
+        m("h1", { class: tw`text-xl font-bold mb-4` }, "Inserisci articoli"),
         m(Overlay, {
           isOpen: overl.open,
           content: m("", { style: overl.style }, [
@@ -189,11 +224,32 @@ const InserisciArticoli = (
             ]),
           ]),
         }),
+        m(Dialog, {
+          isOpen: isDialogOpen,
+          hasCloseButton: false,
+          title: "Conferma",
+          content: "Spedisco la mail?",
+          footer: m("", [
+            m(Button, {
+              label: "Chiudi",
+              onclick: () => isDialogOpen = false,
+            }),
+            m(Button, {
+              label: "Conferma",
+              intent: "primary",
+              onclick: async () => {
+                isDialogOpen = false;
+                await onConfirm(localSettings, dateMs());
+              },
+            }),
+          ]),
+        }),
         m(
           Form,
           {
             onsubmit: (e: SubmitEvent) => {
               e.preventDefault();
+              isDialogOpen = true;
             },
           },
           m(
@@ -205,10 +261,10 @@ const InserisciArticoli = (
               },
             },
             [
-              m("h1", { class: tw`font-bold text-md ml-2` }, "Qtà"),
-              m("h1", { class: tw`font-bold text-md ml-2` }, "Articolo"),
-              m("h1", { class: tw`font-bold text-md ml-2` }, "Prezzo"),
-              m("h1", { class: tw`font-bold text-md ml-2` }, "Totale"),
+              m("h1", { class: tw`font-bold text-md ml-1` }, "Qtà"),
+              m("h1", { class: tw`font-bold text-md ml-1` }, "Articolo"),
+              m("h1", { class: tw`font-bold text-md ml-1` }, "Prezzo"),
+              m("h1", { class: tw`font-bold text-md ml-1` }, "Totale"),
             ],
           ),
           lineItems.map(({ qty, art, price, total }) => {
@@ -240,7 +296,7 @@ const InserisciArticoli = (
               }),
             ),
           ),
-          m("h1", { class: tw`font-bold text-sm ml-2 mt-6` }, "Note Fatture"),
+          m("h1", { class: tw`font-bold text-sm ml-1 mt-6` }, "Note Fatture"),
           m(
             ControlGroup,
             { class: tw`w-full ` },
@@ -254,7 +310,7 @@ const InserisciArticoli = (
               },
             }),
           ),
-          m("h1", { class: tw`font-bold text-sm ml-2 mt-6` }, "Pagamento"),
+          m("h1", { class: tw`font-bold text-sm ml-1 mt-6` }, "Pagamento"),
           m(
             ControlGroup,
             { class: tw`w-full ` },
@@ -268,17 +324,17 @@ const InserisciArticoli = (
               ],
               defaultValue: "",
               required: true,
-              value: v.attrs.store.newClient?.PAGAMENTO || "",
+              value: v.attrs.store.selectedClient?.PAGAMENTO || "",
               onchange(e) {
-                if (v.attrs.store.newClient) {
-                  v.attrs.store.newClient.PAGAMENTO =
+                if (v.attrs.store.selectedClient) {
+                  v.attrs.store.selectedClient.PAGAMENTO =
                     (e.target as HTMLInputElement).value;
-                  console.log(v.attrs.store.newClient);
+                  console.log(v.attrs.store.selectedClient);
                 }
               },
             }),
           ),
-          m("h1", { class: tw`font-bold text-sm ml-2 mt-6` }, "Venditori"),
+          m("h1", { class: tw`font-bold text-sm ml-1 mt-6` }, "Venditori"),
           m(
             ControlGroup,
             { class: tw`w-full ` },
@@ -288,16 +344,43 @@ const InserisciArticoli = (
               required: true,
               value: localSettings?.venditore,
               onchange: (e: any) => {
-                if (localSettings) localSettings.venditore = e.target.value 
+                if (localSettings) localSettings.venditore = e.target.value;
+              },
+            }),
+          ),
+          m("h1", { class: tw`font-bold text-sm ml-1 mt-6` }, "Scontrino"),
+          m(
+            ControlGroup,
+            { class: tw`w-full ` },
+            m(Input, {
+              type: "number",
+              min: 1,
+              id: "scontrino",
+              name: "scontrino",
+              required: true,
+              value: scontrino(),
+              oninput(e: any) {
+                scontrino(parseInt(e.target.value));
+              },
+            }),
+            m(Input, {
+              type: "date",
+              id: "date",
+              name: "date",
+              required: true,
+              min: "2022-01-01",
+              defaultValue: "0000-00-00",
+              onchange(e: any) {
+                const ms = Date.parse(e.target.value);
+                dateMs(new Date(ms));
               },
             }),
           ),
           m(
             ControlGroup,
             {
-              class: tw`w-full grid grid-cols-4 mt-8`,
+              class: tw`w-full grid grid-cols-3 mt-8 w-full`,
             },
-            m("h1", "# Scontrino"),
             m("h1", "Imponibile"),
             m("h1", "IVA"),
             m("h1", "Totale Lordo"),
@@ -305,20 +388,8 @@ const InserisciArticoli = (
           m(
             ControlGroup,
             {
-              class: tw`grid grid-cols-4`,
+              class: tw`grid grid-cols-3 w-full`,
             },
-            m(Input, {
-              type: "number",
-              min: 1,
-              id: "scontrino",
-              name: "scontrino",
-              required: true,
-              // contentLeft: m(Tag, { label: "#SCONTRINO" }),
-              value: scontrino(),
-              oninput(e: any) {
-                scontrino(parseInt(e.target.value));
-              },
-            }),
             m(Input, {
               contentLeft: euroTag,
               disabled: true,
@@ -343,26 +414,11 @@ const InserisciArticoli = (
               class: tw`mt-4 flex justify-end`,
             },
             m(Button, {
-              label: "Valida Ordine",
+              label: "Emetti",
               type: "submit",
-              intent: "primary",
+              intent: "positive",
               class: tw`mr-2`,
-              onclick() {
-                const orderText = (cl("textarea") as HTMLTextAreaElement).value;
-                navigator.clipboard.writeText(orderText);
-                // saveOrder(orderText);
-              },
             }),
-            //   m(Button, {
-            //     label: "Esegui",
-            //     intent: "positive",
-            //     class: tw`mr-2`,
-            //     async onclick() {
-            //       let out = await runScript();
-            //       overl.open = true;
-            //       overl.content = out;
-            //     },
-            //   }),
           ),
         ),
         m(
@@ -439,8 +495,4 @@ const LineItem = (v: Vnode<LineItem, {}>) => {
   };
 };
 
-const saveOrder = (text: string) => {
-  const ev = createEvent({ text });
-  document.dispatchEvent(ev);
-};
 export { InserisciArticoli };

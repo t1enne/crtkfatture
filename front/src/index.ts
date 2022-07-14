@@ -1,11 +1,14 @@
 import m from "mithril";
-import { App } from "./App";
+import { App, ClientInterface } from "./App";
 
 declare global {
   interface Window {
     localSettings: LocalSettings;
     fetchConfigFileContent(): Promise<string>;
     writeConfigFile(fileContent: string): Promise<boolean>;
+    sendMail(subject: string, mailBody: string);
+    writeToClientsFile(json: ClientInterface): Promise<boolean>;
+    findClients(query: string): ClientInterface[];
   }
 }
 

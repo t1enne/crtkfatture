@@ -1,0 +1,47 @@
+[
+  {
+    "header": "111 # PUGLIA",
+    "INDIRIZZO": "11111111111 # 11111 # 11111111111 # 11 # PUGLIA",
+    "PIVA": "11111111111",
+    "CF": "11111111111",
+    "CODUNIVOCO": "1111111",
+    "PEC": "",
+    "EMAIL": "",
+    "CONTATTO": "...",
+    "PAGAMENTO": "",
+    "TEL": "...",
+    "LISTINO": "L4",
+    "TRASPORTA": "DESTINATARIO",
+    "START": "11/10/2022 ROMAEST"
+  },
+  {
+    "header": "22222 # PUGLIA",
+    "INDIRIZZO": "11111111111 # 11111 # 11111111111 # 11 # PUGLIA",
+    "PIVA": "11111111111",
+    "CF": "11111111111",
+    "CODUNIVOCO": "1111111",
+    "PEC": "",
+    "EMAIL": "",
+    "CONTATTO": "...",
+    "PAGAMENTO": "",
+    "TEL": "...",
+    "LISTINO": "L4",
+    "TRASPORTA": "DESTINATARIO",
+    "START": "11/10/2022 ROMAEST"
+  },
+  {
+    "header": "333 # PUGLIA",
+    "INDIRIZZO": "11111111111 # 11111 # 11111111111 # 11 # PUGLIA",
+    "PIVA": "11111111111",
+    "CF": "11111111111",
+    "CODUNIVOCO": "1111111",
+    "PEC": "",
+    "EMAIL": "",
+    "CONTATTO": "...",
+    "PAGAMENTO": "",
+    "TEL": "...",
+    "LISTINO": "L4",
+    "TRASPORTA": "DESTINATARIO",
+    "START": "11/10/2022 ROMAEST"
+  }
+]

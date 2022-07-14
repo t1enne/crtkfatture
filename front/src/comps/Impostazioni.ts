@@ -3,6 +3,7 @@ import { tw } from "twind";
 import {
   Button,
   ControlGroup,
+  Dialog,
   Form,
   FormGroup,
   FormLabel,
@@ -14,30 +15,59 @@ import {
 } from "construct-ui";
 import { TabsProps } from "../App";
 import { AppToaster } from "./AppToaster";
+import { cl } from "../utils";
 
 export const Impostazioni = (
   v: Vnode<TabsProps, {}>,
 ) => {
-  let localSettings: Window["localSettings"]  
+  let localSettings: Window["localSettings"];
+  let isDialogOpen = false;
+
+  async function addSeller() {
+    const dialog = cl("dialog#add-seller") as HTMLDialogElement;
+    const target = (cl("form#add-seller") as any);
+    const inputs = target.elements;
+    localSettings?.venditori.push(inputs[0].value);
+    isDialogOpen = false;
+    await updateConfig(localSettings);
+    m.redraw();
+  }
 
   return {
     oninit() {
-      console.log('init of Settings')
+      console.log("init of Settings");
     },
     onupdate() {
-      localSettings = v.attrs.store.localSettings
+      localSettings = v.attrs.store.localSettings;
     },
     view() {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
         m("h1", { class: tw`text-xl font-bold mb-4` }, "Impostazioni"),
+        m(Dialog, {
+          isOpen: isDialogOpen,
+          hasCloseButton: false,
+          title: "Conferma",
+          content: "Aggiungere venditore?",
+          footer: m("", [
+            m(Button, {
+              label: "Chiudi",
+              onclick: () => isDialogOpen = false,
+            }),
+            m(Button, {
+              label: "Conferma",
+              intent: "primary",
+              onclick: async () => await addSeller(),
+            }),
+          ]),
+        }),
+
         m(Form, {
-          async onsubmit(e: any) {
+          id: "add-seller",
+          onsubmit(e: any) {
             e.preventDefault();
-            const { target } = e;
-            const inputs = target.elements
-            localSettings?.venditori.push(inputs[0].value);
+            isDialogOpen = true;
           },
         }, [
           m(
@@ -70,8 +100,19 @@ export const Impostazioni = (
               .map((venditore) =>
                 m(Tag, {
                   label: venditore,
-                  rounded: true,
                   size: "sm",
+                  removable: true,
+                  async onRemove(e: any) {
+                    if (!localSettings) return;
+                    console.log({ localSettings });
+                    const span = e.target.parentElement.parentElement;
+                    const seller = span.textValue;
+                    const index = localSettings?.venditori.findIndex(
+                      (venditore) => seller === venditore,
+                    );
+                    localSettings?.venditori.splice(index, 1);
+                    await updateConfig(localSettings);
+                  },
                 })
               ),
           ),
@@ -88,20 +129,7 @@ export const Impostazioni = (
                 const { name, value } = input;
                 localSettings[name] = value;
               });
-              const saved = await window.writeConfigFile(
-                JSON.stringify(v.attrs.store.localSettings, null, 2),
-              );
-              if (saved) {
-                AppToaster.notify({
-                  intent: "positive",
-                  msg: "Impostazioni salvate!",
-                });
-              } else {
-                AppToaster.notify({
-                  intent: "negative",
-                  msg: "Non sono riuscito a scrivere il file!",
-                });
-              }
+              await updateConfig(localSettings);
             },
           },
           m(
@@ -115,7 +143,11 @@ export const Impostazioni = (
               },
             },
             [
-              m(FormLabel, { for: "shop" }, "Negozio"),
+              m(FormLabel, {
+                for: "shop",
+                title:
+                  "Questo campo viene utilizzato per spedire la copia della mail della fattura. Quindi PORTE DI CATANIA -> portedicatania@cortekstore.com e così via",
+              }, "Negozio"),
               m(
                 ControlGroup,
                 { class: tw`block` },
@@ -123,7 +155,8 @@ export const Impostazioni = (
                   class: tw`block w-48`,
                   name: "shop",
                   options: localSettings?.shops || [],
-                  value: localSettings?.shop || "",
+                  value: localSettings?.shop,
+                  defaultValue: "",
                 }),
               ),
             ],
@@ -139,3 +172,20 @@ export const Impostazioni = (
     },
   };
 };
+
+async function updateConfig(newSettings: Window["localSettings"]) {
+  const saved = await window.writeConfigFile(
+    JSON.stringify(newSettings, null, 2),
+  );
+  if (saved) {
+    AppToaster.notify({
+      intent: "positive",
+      msg: "Impostazioni salvate!",
+    });
+  } else {
+    AppToaster.notify({
+      intent: "negative",
+      msg: "Non sono riuscito a scrivere il file!",
+    });
+  }
+}

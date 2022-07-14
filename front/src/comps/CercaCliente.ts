@@ -4,17 +4,9 @@ import { ControlGroup, Icon, Icons, Input, List, ListItem } from "construct-ui";
 import { ClientInterface, selTab, TabsProps } from "../App";
 
 export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
-  let clients = [];
+  let clients: ClientInterface[] = [];
   let searchQuery = "";
   return {
-    async oninit() {
-      //@ts-ignore
-      v.attrs.store.clients = await fetchClients();
-      clients = v.attrs.store.clients;
-    },
-    async onupdate() {
-      if (localStorage.dataPath && clients?.length == 0) await sendReadEvent();
-    },
     view() {
       return m(`.tab`, {
         class: v.attrs.active ? "active" : "",
@@ -28,15 +20,17 @@ export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
           m(Input, {
             contentLeft: m(Icon, { name: Icons.SEARCH }),
             placeholder: "Ricerca Cliente",
-            minlength: 11,
+            minlength: 1,
             maxlength: 11,
             type: "tel",
             class: tw`piva w-full`,
-            onkeyup(e: any) {
+            async onkeyup(e: any) {
               searchQuery = e.target.value.toUpperCase();
+              clients = await window.findClients(searchQuery);
+              console.log(clients);
             },
           }),
-          clients && clients.length != 0 && m(
+          clients.length > 0 && m(
             `.list_wrap`,
             {
               class: tw`relative`,
@@ -46,10 +40,7 @@ export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
               {
                 class: tw`rounded-md shadow-xl`,
               },
-              v.attrs.store.clients.length > 0 && v.attrs.store.clients
-                .filter((item: ClientInterface) => {
-                  return filterCheck(item, searchQuery);
-                })
+              clients
                 .map((fItem: ClientInterface, i: number) => {
                   return m(ListItem, {
                     key: i,
@@ -58,13 +49,11 @@ export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
                       m(".client_piva", fItem.PIVA),
                     ]),
                     onclick(e) {
-                      // v.attrs.store.inputs = fItem;
-                      for (let f in v.attrs.store.inputs) {
-                        v.attrs.store.inputs[f] = fItem[f];
-                      }
+                      // for (let f in v.attrs.store.newClient) {
+                      //   v.attrs.store.newClient[f] = fItem[f];
+                      // }
                       v.attrs.store.selectedClient = fItem;
-                      v.attrs.store.newClient = undefined;
-                      if (fItem.TIPO == "TESTER") v.attrs.store.iva = 1.04;
+                      // if (fItem.TIPO == "TESTER") v.attrs.store.iva = 1.04;
                       console.log(fItem);
                       selTab(2, v.attrs.store);
                     },
@@ -79,25 +68,12 @@ export const CercaCliente = (v: Vnode<TabsProps, {}>) => {
     },
   };
 };
-export function createEvent<T>(obj: T) {
-  const ev = new CustomEvent("create-stream", {
-    detail: obj,
-  });
-  return ev;
-}
-const sendReadEvent = async () => {
-  // const ev = createEvent({
-  //   action: "read",
-  //   arg: localStorage.dataPath + "/clienti.txt",
-  // });
-  // document.dispatchEvent(ev);
-};
 
-const filterCheck = (item, query) => {
-  if (item && query != "") {
-    const q = query;
-    const headerMatch = item.header.includes(q);
-    const ivaMatch = item.PIVA ? item.PIVA.includes(q) : false;
-    return headerMatch || ivaMatch;
-  } else return false;
-};
+// const filterCheck = (item, query) => {
+//   if (item && query != "") {
+//     const q = query;
+//     const headerMatch = item.header.includes(q);
+//     const ivaMatch = item.PIVA ? item.PIVA.includes(q) : false;
+//     return headerMatch || ivaMatch;
+//   } else return false;
+// };

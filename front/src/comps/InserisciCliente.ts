@@ -124,7 +124,7 @@ export const InserisciCliente = (
     { selectedRegion: string }
   >,
 ) => {
-  let { localSettings } = v.attrs.store
+  let { localSettings } = v.attrs.store;
   const clientGroup: Stream<string> = stream("");
 
   const clientUserInput: InputConfType = {
@@ -247,7 +247,8 @@ export const InserisciCliente = (
     "Email": {
       info: "Mail del richiedente fatture",
       props: {
-        pattern: ".*@.*\\.\\w*",
+        required: true,
+        pattern: "(.*@.*\\.\\w*|...)",
       },
     },
     "Contatto": {
@@ -299,7 +300,7 @@ export const InserisciCliente = (
 
   return {
     onupdate() {
-      localSettings = v.attrs.store.localSettings
+      localSettings = v.attrs.store.localSettings;
     },
     view() {
       return m(
@@ -404,9 +405,8 @@ export const InserisciCliente = (
               }),
               m(Button, {
                 type: "submit",
-                label: "Conferma",
+                label: "Aggiungi Cliente",
                 intent: "positive",
-                // value: v.attrs.store.inputs,
               }),
             ),
           ),
@@ -491,7 +491,7 @@ const getInputVnode = (
   }
 };
 
-const handleSubmit = (
+const handleSubmit = async (
   e: SubmitEvent,
   v: Vnode<TabsProps, {}>,
 ) => {
@@ -510,7 +510,7 @@ const handleSubmit = (
     values["Città"]
   } # ${values["Provincia"]} # ${values["Regione"]}`;
 
-  v.attrs.store.newClient = {
+  v.attrs.store.selectedClient = {
     header: `${values["Denominazione"]} # ${values["Regione"]}`,
     INDIRIZZO: addressString,
     PIVA: values["P_IVA"],
@@ -519,12 +519,16 @@ const handleSubmit = (
     PEC: values["PEC"],
     EMAIL: values["EMAIL"],
     CONTATTO: values["Contatto"],
-    PAGAMENTO: "CARTA",
     TEL: values["Telefono"],
     LISTINO: "L4",
+    PAGAMENTO: "",
     TRASPORTA: "DESTINATARIO",
     START: "11/10/2022 ROMAEST",
   };
+
+  const written = await window.writeToClientsFile(v.attrs.store.selectedClient);
+
+  console.log({ written });
 
   selTab(1, v.attrs.store);
 };

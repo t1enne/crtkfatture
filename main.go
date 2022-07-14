@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -10,7 +11,10 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
+	"time"
 
+	mail "github.com/xhit/go-simple-mail/v2"
 	"github.com/zserge/lorca"
 )
 
@@ -21,22 +25,38 @@ var fs embed.FS
 // is executed in its own goroutine. In this simple case we may use atomic
 // operations, but for more complex cases one should use proper synchronization.
 type Config struct {
-	Shop    string   `json:"shop"`
-	Shops   []string `json:"shops"`
-	Regioni []string `json:"regioni"`
-	From    string   `json:"from"`
-	To      string   `json:"to"`
+	Shop      string   `json:"shop"`
+	Shops     []string `json:"shops"`
+	To        string   `json:"to"`
+	Venditore string   `json:"venditore"`
+	Venditori []string `json:"venditori"`
+}
+
+type Client struct {
+	Header     string `json:"header"`
+	INDIRIZZO  string
+	PIVA       string
+	CF         string
+	CODUNIVOCO string
+	PEC        string
+	EMAIL      string
+	CONTATTO   string
+	PAGAMENTO  string
+	TEL        string
+	LISTINO    string
+	TRASPORTA  string
+	START      string
 }
 
 func readConfig() string {
-	configFile, err := os.ReadFile("./config.json")
+	configFile, err := os.ReadFile("data/config.json")
 	check(err)
 
 	return string(configFile)
 }
 
 func parseConfig(configContent string) Config {
-	configFile, err := os.ReadFile("./config.json")
+	configFile, err := os.ReadFile("data/config.json")
 	check(err)
 	var config = Config{}
 	err = json.Unmarshal(configFile, &config)
@@ -45,14 +65,64 @@ func parseConfig(configContent string) Config {
 	return config
 }
 
-// func writeConfig(configString string) err error {
+func readClientsFile(array *[]Client) {
+	clientsFileContent, err := os.ReadFile("data/clients.json")
+	check(err)
 
-// 	return true
-// }
+	err = json.Unmarshal(clientsFileContent, array)
+	check(err)
+}
 
-func sendMail(config Config) string {
-	fmt.Println(config.From)
-	return config.From
+func sendMail(config Config, subject string, mailBody string) bool {
+
+	server := mail.NewSMTPClient()
+
+	// SMTP Server
+	server.Host = "smtps.aruba.it"
+	server.Port = 465
+	server.Username = "incassi@cortekstore.com"
+	server.Password = "tulucinc745"
+	server.Encryption = mail.EncryptionSSLTLS
+
+	server.KeepAlive = false
+	server.ConnectTimeout = 10 * time.Second
+	server.SendTimeout = 10 * time.Second
+	server.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	smtpClient, err := server.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// get shops address from name
+	shopSplit := strings.ReplaceAll(config.Shop, " ", "")
+	shopJoined := strings.ToLower(shopSplit)
+
+	// New email simple html with inline and CC
+	email := mail.NewMSG()
+	email.SetFrom("incassi@cortekstore.com").
+		AddTo(config.To).
+		AddBcc(shopJoined + "@cortekstore.com").
+		SetSubject(subject)
+
+	email.SetBody(mail.TextPlain, mailBody)
+
+	err = email.Send(smtpClient)
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
+func filterClients(clients []Client, query string) []Client {
+	var found []Client
+	for _, client := range clients {
+		if strings.Contains(client.Header, query) {
+			found = append(found, client)
+		}
+	}
+	return found
 }
 
 // func getClients() []stringMap {
@@ -107,30 +177,61 @@ func main() {
 	}
 
 	ui, err := lorca.New("", "", 1024, 980, args...)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ui.Close()
 
 	configFileContent := readConfig()
+	var clients []Client
+	readClientsFile(&clients)
+
+	log.Println(clients)
+
 	config := parseConfig(configFileContent)
+	log.Println(config)
 	// A simple way to know when UI is ready (uses body.onload event in JS)
 	ui.Bind("start", func() {
 		log.Println("UI is ready")
 	})
 
 	ui.Bind("fetchConfigFileContent", func() string {
-		log.Println("fetching config file")
+		log.Print("fetching config file\n\n")
 		return configFileContent
 	})
 
-	ui.Bind("sendMail", func() {
-		sendMail(config)
+	ui.Bind(("findClients"), func(query string) []Client {
+		filtered := filterClients(clients, query)
+		return filtered
+	})
+
+	ui.Bind("writeToClientsFile", func(client Client) bool {
+		log.Print("writing to clients file\n\n")
+		clients = append(clients, client)
+		jsonBytes, err := json.MarshalIndent(clients, "", "  ")
+		check(err)
+
+		err = os.WriteFile(`data/clients.json`, jsonBytes, 0644)
+		if err != nil {
+			return false
+		} else {
+			return true
+		}
+	})
+
+	ui.Bind("sendMail", func(subject, mailBody string) bool {
+		log.Println(mailBody)
+		success := sendMail(config, subject, mailBody)
+		return success
 	})
 
 	ui.Bind("writeConfigFile", func(fileContent string) bool {
 		bytes := []byte(fileContent)
-		err := os.WriteFile(`./config.json`, bytes, 0644)
+		// update process config
+		config = parseConfig(fileContent)
+		log.Println(config)
+		err := os.WriteFile(`data/config.json`, bytes, 0644)
 		if err != nil {
 			return false
 		} else {
@@ -148,8 +249,8 @@ func main() {
 	}
 	defer ln.Close()
 	go http.Serve(ln, http.FileServer(http.FS(fs)))
-	ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
-	// ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
+	// ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
+	ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
 
 	// Wait until the interrupt signal arrives or browser window is closed
 	sigc := make(chan os.Signal)

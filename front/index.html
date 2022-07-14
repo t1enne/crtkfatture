@@ -13,6 +13,8 @@
       let settings;
       window.fetchConfigFileContent = fetchConfigFileContent;
       window.writeConfigFile = writeConfigFile;
+      window.sendMail = sendMail;
+      window.findClients = findClients;
 
       (async () => {
         window.localSettings = JSON.parse(await fetchConfigFileContent());

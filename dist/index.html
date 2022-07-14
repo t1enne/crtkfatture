@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="./assets/favicon.7a6f6d17.ico" />
     <title>CortekStore Fatture</title>
-    <script type="module" crossorigin src="./assets/index.0ce5eb85.js"></script>
-    <link rel="stylesheet" href="./assets/index.3505e917.css">
+    <script type="module" crossorigin src="./assets/index.d5ad6164.js"></script>
+    <link rel="stylesheet" href="./assets/index.1c3c92ae.css">
   </head>
 
   <body onload="start()">
@@ -15,6 +15,8 @@
       let settings;
       window.fetchConfigFileContent = fetchConfigFileContent;
       window.writeConfigFile = writeConfigFile;
+      window.sendMail = sendMail;
+      window.findClients = findClients;
 
       (async () => {
         window.localSettings = JSON.parse(await fetchConfigFileContent());

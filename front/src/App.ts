@@ -6,6 +6,7 @@ import "../node_modules/construct-ui/lib/index.css";
 import { tw } from "twind";
 import { cl } from "./utils";
 import {
+  CercaCliente,
   // CercaCliente,
   InserisciArticoli,
   InserisciCliente,
@@ -35,7 +36,7 @@ export interface StoreInterface {
   clients: ClientInterface[];
   inputs: ClientInterface;
   selectedClient: ClientInterface;
-  newClient: ClientInterface;
+  newClient: boolean;
   activeTab: number;
   iva: 1.22 | 1.04;
   localSettings: Window["localSettings"];
@@ -66,13 +67,17 @@ const Store: StoreInterface = {
   clients: [],
   inputs: inputFields,
   selectedClient: undefined,
-  newClient: undefined,
+  newClient: false,
   activeTab: 0,
   iva: 1.22,
   localSettings: window.localSettings,
 };
 
 const tabs = [
+  {
+    tabView: CercaCliente,
+    label: [m(Icon, { name: Icons.SEARCH }), ""],
+  },
   {
     tabView: InserisciCliente,
     label: [m(Icon, { name: Icons.USER }), ""],
@@ -83,26 +88,25 @@ const tabs = [
   },
   {
     tabView: Impostazioni,
-    label: [m(Icon, { name: Icons.SETTINGS }), m(``, "")],
+    label: [m(Icon, { name: Icons.SETTINGS }), ""],
   },
-]
+];
 
 export const App = (v: Vnode<{}, { active: number }>) => {
   return {
     async oninit() {
-      console.log('init of App');
+      console.log("init of App");
       const configContent = await window.fetchConfigFileContent();
       Store.localSettings = JSON.parse(configContent);
       if (!Store.localSettings) {
         console.log("setting from window");
-        Store.localSettings = window.localSettings
+        Store.localSettings = window.localSettings;
       }
     },
     onupdate() {
       console.log(Store.localSettings);
     },
     view() {
-
       return m(
         ".app_root",
         {
@@ -118,7 +122,7 @@ export const App = (v: Vnode<{}, { active: number }>) => {
           m(Tabs, {
             fluid: true,
             size: "sm",
-            class: tw`mb-4 grid grid-cols-3`,
+            class: tw`mb-4 grid grid-cols-4`,
           }, [
             tabs.map((tab, i) => {
               return m(TabItem, {
@@ -137,11 +141,11 @@ export const App = (v: Vnode<{}, { active: number }>) => {
             {
               class: tw`overflow-hidden`,
             },
-            [0, 1, 2].map((i: number) => {
+            tabs.map((tab, i) => {
               return m(tabs[i].tabView, {
                 active: Store.activeTab === i,
-                store: Store
-              })
+                store: Store,
+              });
             }),
           ),
           m(Toasts, {
