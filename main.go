@@ -30,6 +30,7 @@ type Config struct {
 	To        string   `json:"to"`
 	Venditore string   `json:"venditore"`
 	Venditori []string `json:"venditori"`
+	Pwd       string   `json:"pwd"`
 }
 
 type Client struct {
@@ -81,7 +82,7 @@ func sendMail(config Config, subject string, mailBody string) bool {
 	server.Host = "smtps.aruba.it"
 	server.Port = 465
 	server.Username = "incassi@cortekstore.com"
-	server.Password = "tulucinc745"
+	server.Password = config.Pwd
 	server.Encryption = mail.EncryptionSSLTLS
 
 	server.KeepAlive = false

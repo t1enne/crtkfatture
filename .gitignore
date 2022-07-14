@@ -5,3 +5,4 @@
 front/node_modules
 dist
 *exe
+data/config.json
