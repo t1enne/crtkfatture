@@ -1,5 +1,5 @@
 {
-  "shop": "GLOBO",
+  "shop": "GHERLINDA",
   "shops": [
     "ROMAEST",
     "FIUMARA",
@@ -12,7 +12,8 @@
   "venditore": "Nazir",
   "venditori": [
     "Iman",
-    "Nazir"
+    "Nazir",
+    "asd"
   ],
   "regioni": [
     "PUGLIA",

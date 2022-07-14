@@ -81,11 +81,12 @@ const parseNewClient = (client: ClientInterface) => {
 };
 
 const InserisciArticoli = (
-  v: Vnode<TabsProps, { localSettings: Window["localSettings"] }>,
+  v: Vnode<TabsProps, {}>,
 ) => {
   let note = stream<string>(""),
     scontrino = stream<number>(0),
-    lineItems: LineItem[] = [];
+    lineItems: LineItem[] = [],
+    localSettings: Window["localSettings"]
 
   const addLineItem = () => {
     let qty = stream(0),
@@ -157,19 +158,20 @@ const InserisciArticoli = (
     },
   };
 
+
+
   return {
     oninit() {
       addLineItem();
     },
-    oncreate() {
-      console.log(v.attrs.store.localSettings);
-      m.redraw()
+    onupdate() {
+      localSettings = v.attrs.store.localSettings
     },
     view() {
       return m(".tab", {
         class: v.attrs.active ? "active" : "",
       }, [
-        m("h1", { class: tw`text-xl font-bold mb-4` }, v.attrs.store.localSettings?.shop),
+        m("h1", { class: tw`text-xl font-bold mb-4` }, localSettings?.shop),
         m(Overlay, {
           isOpen: overl.open,
           content: m("", { style: overl.style }, [
@@ -191,7 +193,6 @@ const InserisciArticoli = (
           Form,
           {
             onsubmit: (e: SubmitEvent) => {
-              console.log(v.attrs.store.localSettings)
               e.preventDefault();
             },
           },
@@ -282,14 +283,12 @@ const InserisciArticoli = (
             ControlGroup,
             { class: tw`w-full ` },
             m(Select, {
-              options: v.attrs.store.localSettings?.venditori,
+              options: localSettings?.venditori,
               defaultValue: "",
               required: true,
-              value: v.attrs.store.localSettings?.venditore,
+              value: localSettings?.venditore,
               onchange: (e: any) => {
-                if (v.attrs.store.localSettings) {
-                  v.attrs.store.localSettings.venditore = e.target.value;
-                }
+                if (localSettings) localSettings.venditore = e.target.value 
               },
             }),
           ),

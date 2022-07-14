@@ -121,11 +121,10 @@ const handleClientGroupChange = (
 export const InserisciCliente = (
   v: Vnode<
     TabsProps,
-    { selectedRegion: string; localSettings: Window["localSettings"] }
+    { selectedRegion: string }
   >,
 ) => {
-  const { localSettings } = v.attrs.store
-  console.log({ localSettings, store: v.attrs.store})
+  let { localSettings } = v.attrs.store
   const clientGroup: Stream<string> = stream("");
 
   const clientUserInput: InputConfType = {
@@ -299,8 +298,8 @@ export const InserisciCliente = (
   ];
 
   return {
-    oninit() {
-      console.log(localSettings)
+    onupdate() {
+      localSettings = v.attrs.store.localSettings
     },
     view() {
       return m(

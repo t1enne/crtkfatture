@@ -148,8 +148,8 @@ func main() {
 	}
 	defer ln.Close()
 	go http.Serve(ln, http.FileServer(http.FS(fs)))
-	// ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
-	ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
+	ui.Load(fmt.Sprintf("http://%s/dist", ln.Addr()))
+	// ui.Load(fmt.Sprintf("http://%s/front/dist", "127.0.0.1:3000"))
 
 	// Wait until the interrupt signal arrives or browser window is closed
 	sigc := make(chan os.Signal)

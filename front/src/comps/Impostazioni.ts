@@ -16,12 +16,16 @@ import { TabsProps } from "../App";
 import { AppToaster } from "./AppToaster";
 
 export const Impostazioni = (
-  v: Vnode<TabsProps, { localSettings: Window["localSettings"] }>,
+  v: Vnode<TabsProps, {}>,
 ) => {
-  
+  let localSettings: Window["localSettings"]  
+
   return {
     oninit() {
       console.log('init of Settings')
+    },
+    onupdate() {
+      localSettings = v.attrs.store.localSettings
     },
     view() {
       return m(".tab", {
@@ -33,7 +37,7 @@ export const Impostazioni = (
             e.preventDefault();
             const { target } = e;
             const inputs = target.elements
-            v.attrs.store.localSettings?.venditori.push(inputs[0].value);
+            localSettings?.venditori.push(inputs[0].value);
           },
         }, [
           m(
@@ -62,7 +66,7 @@ export const Impostazioni = (
             {
               class: tw`flex flex-wrap pb-4`,
             },
-            v.attrs.store.localSettings?.venditori
+            localSettings?.venditori
               .map((venditore) =>
                 m(Tag, {
                   label: venditore,
@@ -82,7 +86,7 @@ export const Impostazioni = (
               const inputs = Array.from(target.elements);
               inputs.forEach((input: HTMLInputElement) => {
                 const { name, value } = input;
-                v.attrs.store.localSettings[name] = value;
+                localSettings[name] = value;
               });
               const saved = await window.writeConfigFile(
                 JSON.stringify(v.attrs.store.localSettings, null, 2),
@@ -118,8 +122,8 @@ export const Impostazioni = (
                 m(Select, {
                   class: tw`block w-48`,
                   name: "shop",
-                  options: v.attrs.store.localSettings?.shops || [],
-                  value: v.attrs.store.localSettings?.shop || "",
+                  options: localSettings?.shops || [],
+                  value: localSettings?.shop || "",
                 }),
               ),
             ],
